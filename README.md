@@ -64,6 +64,8 @@ elmo-hikes/
 
 - **Jill Bautusta** - BCIT CST Student who appricates walks
 - **Darwin Su** - BCIT CST Student, basic with honours amateur radio certificate holder.
+- **Jill** - BCIT CST Student with a passion for outdoor adventures and user-friendly applications. Fun fact: Loves solving Rubik's Cubes in under a minute.
+- **BBY_09** - BCIT CST Student, Frontend enthusiast with a knack for creative design. Fun fact: Has a collection of over 50 houseplants.
 
 ---
 
