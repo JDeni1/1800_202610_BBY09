@@ -66,9 +66,9 @@ elmo-hikes/
 
 
 ## Contributors
-
 - **Ozgur** - BCIT CST Student learning Git collaboration.
-- **Teammate Name** - BCIT CST Student, Frontend enthusiast with a knack for creative design. Fun fact: Has a collection of over 50 houseplants.
+- - **Jill** - BCIT CST Student, who appricate walks.
+- **Darwin** - BCIT CST Student, a radio expert.
 
 ---
 
