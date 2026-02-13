@@ -68,7 +68,7 @@ elmo-hikes/
 ## Contributors
 - **Ozgur** - BCIT CST Student learning Git collaboration.
 - **Jill** - BCIT CST Student, who appricate walks.
-- **Darwin** - BCIT CST Student, a radio expert.
+- **Darwin** - BCIT CST Student, a radio expert.!
 
 ---
 
