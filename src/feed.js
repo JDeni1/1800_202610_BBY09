@@ -1,23 +1,3 @@
-// function loadPosts() {
-//   const posts = JSON.parse(localStorage.getItem("posts") || "[]");
-//   posts.forEach((postData) => {
-//     const post = document.createElement("div");
-//     post.className = "card mb-3";
-//     post.innerHTML = `
-//       ${postData.image ? `<img src="${postData.image}" class="card-img-top">` : ""}
-//       <div class="card-body">
-//         <h6>${postData.username}</h6>
-//         <small>Just now</small>
-//         <p>${postData.content}</p>
-//       </div>
-//     `;
-//     feed.append(post);
-//   });
-// }
-
-// // Call this when the page loads
-// loadPosts();
-
 /*Content */
 const form = document.getElementById("postForm");
 const feed = document.getElementById("feed");
