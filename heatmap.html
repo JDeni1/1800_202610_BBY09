@@ -10,12 +10,10 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-     crossorigin=""/>
-      <!-- Make sure you put this AFTER Leaflet's CSS -->
- <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
-     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
      crossorigin="">
-     </script>
+      <!-- Make sure you put this AFTER Leaflet's CSS -->
+ <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
      
      <style>
       #map { height: 641px; }
@@ -61,21 +59,46 @@
 <!-- Navbar -->
 
  <div id="map"></div>
-
-
+ 
 </body>
 
 <script>
-var map = L.map('map').setView([49.282730, -123.120735], 13);
+    var map = L.map('map').setView([49.2827, -123.1207], 13);
 
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-}).addTo(map);
+    var osmLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
 
-var marker = L.marker([49.276759, -123.112106]).addTo(map);
+    // 1. Define Markers
+    var bcPlace = L.marker([49.276759, -123.112106]).bindPopup("<b>BC Place Stadium</b>");
+    var pneAmphitheatre = L.marker([49.2828, -123.0366]).bindPopup("<b>PNE Amphitheatre</b>");
 
-marker.bindPopup("<b>BC Place Stadium</b><br>Where the matches will take place.").openPopup();
+    // 2. Define Heatmap Data [lat, lng, intensity]
+    var crowdData = [
+        [49.2828, -123.0366, 1.0], // Super crowded at the stage
+        [49.2830, -123.0370, 0.7], 
+        [49.2825, -123.0360, 0.8],
+        [49.2767, -123.1121, 0.9]  // Crowds at BC Place too
+    ];
+
+    // 3. Create the Heat Layer
+    var heatLayer = L.heatLayer(crowdData, {radius: 25, blur: 15});
+
+    // 4. Setup Controls
+    var baseMaps = { "OpenStreetMap": osmLayer };
+    var overlayMaps = {
+        "BC Place": bcPlace,
+        "PNE Fan Festival": pneAmphitheatre,
+        "Crowd Density": heatLayer // This adds the checkbox!
+    };
+
+    // Add everything to map by default
+    bcPlace.addTo(map);
+    pneAmphitheatre.addTo(map);
+    heatLayer.addTo(map);
+
+    L.control.layers(baseMaps, overlayMaps).addTo(map);
 </script>
 
 </html>
