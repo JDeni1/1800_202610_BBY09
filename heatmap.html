@@ -1,32 +1,48 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CrowdControl - Heatmap</title>
 
-<link href="./bootstrap/css/bootstrap.css" rel="stylesheet">
-<link href="./styles/style.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-     crossorigin=""/>
-      <!-- Make sure you put this AFTER Leaflet's CSS -->
- <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-     crossorigin=""></script>
-     
-     <style>
-      #map { height: 641px; }
-     </style>
-</head>
+    <link href="./bootstrap/css/bootstrap.css" rel="stylesheet" />
+    <link href="./styles/style.css" rel="stylesheet" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <!-- Make sure you put this AFTER Leaflet's CSS -->
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
 
-<body>
-    <!-- Navbar -->
+    <style>
+      #map {
+        height: 641px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!--Navbar-->
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
       <div class="container-fluid">
+<<<<<<< HEAD
+        <a class="navbar-brand" href="#"
+          ><img src="./images/ApplogowithoutName.png" height="75" />
+          CrowdControl</a
+=======
         <a class="navbar-brand" href="#">
           <img src="./images/CrowdControlApp.png" height="36" /> CrowdControl</a>
+>>>>>>> main
         >
         <button
           class="navbar-toggler"
@@ -42,39 +58,52 @@
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav">
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="./index.html">Home</a>
+              <a class="nav-link active" aria-current="page" href="#">Home</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="./heatmap.html">HeatMap</a>
+              <a class="nav-link" href="heatmap.html">HeatMap</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">Navigation</a>
+              <a class="nav-link" href="socialfeed.html">Social</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" aria-disabled="true">Transit</a>
+              <a class="nav-link" href="">Navigation</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="">Login</a>
             </li>
           </ul>
         </div>
       </div>
     </nav>
-<!-- Navbar -->
 
- <div id="map"></div>
+    <!-- Navbar -->
 
+    <div id="map"></div>
+  </body>
 
-</body>
+  <script>
+    var map = L.map("map").setView([49.28273, -123.120735], 13);
 
-<script>
-  var map = L.map('map').setView([49.282730, -123.120735], 13);
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution:
+        '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    }).addTo(map);
 
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-}).addTo(map);
+    var marker = L.marker([49.276759, -123.112106]).addTo(map);
 
+<<<<<<< HEAD
+    marker
+      .bindPopup("<b>BC Place Stadium</b><br>Opening Ceremony.")
+      .openPopup();
+  </script>
+</html>
+=======
 var marker = L.marker([49.276759, -123.112106]).addTo(map);
 
 marker.bindPopup("<b>BC Place Stadium</b><br>Where the matches will take place.").openPopup();
 </script>
 
 </html>
+>>>>>>> main
