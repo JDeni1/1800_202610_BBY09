@@ -1,9 +1,8 @@
 <!doctype html>
 <html lang="en">
-  
   <head>
     <title>CrowdControl</title>
-    <meta name="CrowdControl" content="CrowdControl"/>
+    <meta name="CrowdControl" content="CrowdControl" />
 
     <!-- Required meta tags -->
     <meta charset="utf-8" />
@@ -11,8 +10,8 @@
   </head>
 
   <body>
-      <!--Navbar-->
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <!--Navbar-->
+    <nav class="navbar navbar-expand-lg bg-primary">
       <div class="container-fluid">
         <a class="navbar-brand" href="#"
           ><img src="./images/ApplogowithoutName.png" height="75" />
@@ -40,97 +39,134 @@
             <li class="nav-item">
               <a class="nav-link" href="socialfeed.html">Social</a>
             </li>
-              <li class="nav-item">
-              <a class="nav-link" href="">Navigation</a>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Navigation</a>
             </li>
-               <li class="nav-item">
-              <a class="nav-link" href="">Login</a>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Login</a>
             </li>
           </ul>
         </div>
       </div>
     </nav>
 
-    <!--SCROLLFEED-->
-
-    <!--PROFILE-->
-
-    <!-- JAVA SCRIPT LINKS -->
-
-    <!------------------------------>
-    <!-- Your HTML Layout go here -->
-    <!------------------------------>
-
-
-    <img class="d-block mx-auto mb-4" src="./images/ApplogowithoutName.png" alt="Logo" width="72" height="57"> 
-<div class="p-5 mb-4 bg-light rounded-3">
-      <div class="container-fluid py-5">
-        <h1 class="display-5 fw-bold">Navigate Vancouver Streets with Confidence this Summer!</h1>
-        <p class="col-md-8 fs-4">As fellow sports fans, our team, BBY09, is developing a web application to help the residents of Vancouver 
-            relocate and move around areas with large traffic and crowds by visually seeing these crowded areas with a map and locate them with a GPS.
-</p>
-        
-        
-        <button type="button" class="btn btn-primary btn-lg px-4 gap-3">Start Navigation</button> 
-        <button type="button" class="btn btn-outline-secondary btn-lg px-4">Login</button> 
-
-    
-<div class="container">
-    <div class="row row-cols-1 row-cols-md-3 g-4">
-  <div class="col">
-    <div class="card h-100">
-      <img src="./images/Transit_Icon.png" class="card-img-top" alt="Transit">
-      <div class="card-body">
-        <h5 class="card-title">Transit</h5>
-        <p class="card-text">What can we say? navigating around transit is tough. Not with our app. we map out the directions to and around sport venues with pinpoint accuracy. featuring real time alerts and a heatmap to boast!</p>
+    <!--Content-->
+    <!--Carousel-->
+    <div id="carouselExampleIndicators" class="carousel slide">
+      <div class="carousel-indicators">
+        <button
+          type="button"
+          data-bs-target="#carouselExampleIndicators"
+          data-bs-slide-to="0"
+          class="active"
+          aria-current="true"
+          aria-label="Slide 1"
+        ></button>
+        <button
+          type="button"
+          data-bs-target="#carouselExampleIndicators"
+          data-bs-slide-to="1"
+          aria-label="Slide 2"
+        ></button>
+        <button
+          type="button"
+          data-bs-target="#carouselExampleIndicators"
+          data-bs-slide-to="2"
+          aria-label="Slide 3"
+        ></button>
       </div>
-      <div class="card-footer">
-        <small class="text-muted">More Details...</small>
+      <div class="carousel-inner">
+        <div class="carousel-item active">
+          <img src="./images/fifa.jpg" class="d-block w-100" alt="..." />
+        </div>
+        <div class="carousel-item">
+          <img src="./images/fifa2.jpg" class="d-block w-100" alt="..." />
+        </div>
+        <div class="carousel-item">
+          <img
+            src="./images/CrowdControlAppAlt.png"
+            class="d-block w-100"
+            alt="..."
+          />
+        </div>
+      </div>
+      <button
+        class="carousel-control-prev"
+        type="button"
+        data-bs-target="#carouselExampleIndicators"
+        data-bs-slide="prev"
+      >
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+      </button>
+      <button
+        class="carousel-control-next"
+        type="button"
+        data-bs-target="#carouselExampleIndicators"
+        data-bs-slide="next"
+      >
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+      </button>
+    </div>
+
+    <!--CARDS-->
+    <div class="container mt-5">
+      <div class="row justify-content-center g-4">
+        <div class="card" style="width: 18rem">
+          <img src="./images/heatmap.jpg" class="card-img-top" alt="..." />
+          <div class="card-body">
+            <h5 class="card-title">Heatmap</h5>
+            <p class="card-text">
+              Want to know the latest congested area? Well This map has got you
+              covered!
+            </p>
+            <a href="heatmap.html" class="stretched-link"></a>
+            <a href="heatmap.html" class="btn btn-primary">Click here</a>
+          </div>
+        </div>
+
+        <div class="card" style="width: 18rem">
+          <img src="./images/social.jpg" class="card-img-top" alt="..." />
+          <div class="card-body">
+            <h5 class="card-title">Socialmedia</h5>
+            <p class="card-text">
+              See where the crowd is real time with your fellow residance!
+            </p>
+            <a href="socialfeed.html" class="stretched-link"></a>
+            <a href="socialfeed.html" class="btn btn-primary">Click here</a>
+          </div>
+        </div>
+
+        <div class="card" style="width: 18rem">
+          <img src="./images/navigation.jpg" class="card-img-top" alt="..." />
+          <div class="card-body">
+            <h5 class="card-title">Navigation</h5>
+            <p class="card-text">
+              The fastest and smartest route at your quickest conviance!
+            </p>
+            <a href="" class="stretched-link"></a>
+            <a href="" class="btn btn-primary">Click here</a>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-  <div class="col">
-    <div class="card h-100">
-      <img src="./images/Social_Icon.png" class="card-img-top" alt="Social">
-      <div class="card-body">
-        <h5 class="card-title">Social</h5>
-        <p class="card-text">Stuck hungry? we can find you restuarant for you! Tired? knock yourselves out with our hotel finder!</p>
-      </div>
-      <div class="card-footer">
-        <small class="text-muted">More Details...</small>
-      </div>
+
+    <div class="d-flex justify-content-center gap-1">
+      <button type="button" class="btn btn-primary btn-lg px-4">
+        See the Crowd
+      </button>
+      <button type="button" class="btn btn-outline-secondary btn-lg px-4">
+        Login
+      </button>
     </div>
-  </div>
-  <div class="col">
-    <div class="card h-100">
-      <img src="./images/Hotel_Icon.png" class="card-img-top" alt="Hotel">
-      <div class="card-body">
-        <h5 class="card-title">Heatmap</h5>
-        <p class="card-text"> Featuring our brand patented heatmap^TM, a feature so cool it leaves you...feeling free, flowing in the wind like a feather.</p>
-      </div>
-      <div class="card-footer">
-        <small class="text-muted">More Details...</small>
-      </div>
-    </div>
-  </div>
-</div>
-</div>
-    <!-- Stuff for body goes here -->
 
-
-<footer class="bg-dark text-white text-center p-3 mt-5">
-  <p class="mb-0">© 2026 Team BBY09</p>
-</footer>
-
-
-    <!---------------------------------------------->
-    <!-- Your own JavaScript functions go here    -->
-    <!---------------------------------------------->
+    <footer class="bg-dark text-white text-center p-3 mt-5">
+      <p class="mb-0">© 2026 Team BBY09</p>
+    </footer>
 
     <!-- Link to scripts of your own -->
     <script type="module" src="./src/main.js"></script>
-    <script type="module" src="./src/navbar.js"></script>
     <script type="module" src="./src/firebaseConfig.js"></script>
-    
   </body>
 </html>
