@@ -13,7 +13,7 @@ form.addEventListener("submit", async (e) => {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
 
-  msg.textContent = "Logging in...";
+  msg.innerHTML = `<div class="alert alert-info">Logging in...</div>`;
 
   try {
     const userCredential = await signInWithEmailAndPassword(
@@ -21,10 +21,16 @@ form.addEventListener("submit", async (e) => {
       email,
       password,
     );
-    msg.textContent = `✅ Logged in as: ${userCredential.user.email}`;
+
+    msg.innerHTML = `<div class="alert alert-success">
+    Logged in as ${userCredential.user.email}
+    </div>`;
+
     window.location.href = "/index.html";
   } catch (err) {
-    msg.textContent = `❌ ${err.code}`;
+    msg.innerHTML = `<div class="alert alert-danger">
+    ${err.code}
+    </div>`;
   }
 });
 
@@ -33,16 +39,17 @@ document.getElementById("signupBtn").addEventListener("click", async () => {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
 
-  msg.textContent = "Creating account...";
+  msg.innerHTML = `<div class="alert alert-info">Creating account...</div>`;
 
   try {
-    const userCredential = await createUserWithEmailAndPassword(
-      auth,
-      email,
-      password,
-    );
-    msg.textContent = "✅ User created! You can now log in.";
+    await createUserWithEmailAndPassword(auth, email, password);
+
+    msg.innerHTML = `<div class="alert alert-success">
+    Account created! You can now log in.
+    </div>`;
   } catch (error) {
-    msg.textContent = `❌ ${error.message}`;
+    msg.innerHTML = `<div class="alert alert-danger">
+    ${error.message}
+    </div>`;
   }
 });
