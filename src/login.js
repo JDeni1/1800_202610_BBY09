@@ -15,10 +15,13 @@ form.addEventListener("submit", async (e) => {
   msg.textContent = "Logging in...";
 
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password,
+    );
     msg.textContent = `✅ Logged in as: ${userCredential.user.email}`;
     window.location.href = "/index.html";
-
   } catch (err) {
     msg.textContent = `❌ ${err.code}`;
   }
