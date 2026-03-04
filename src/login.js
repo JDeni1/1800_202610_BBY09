@@ -27,23 +27,22 @@ form.addEventListener("submit", async (e) => {
     msg.textContent = `❌ ${err.code}`;
   }
 });
-<<<<<<< HEAD
-=======
 
 // SIGN UP
 document.getElementById("signupBtn").addEventListener("click", async () => {
-
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
 
   msg.textContent = "Creating account...";
 
   try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password,
+    );
     msg.textContent = "✅ User created! You can now log in.";
   } catch (error) {
     msg.textContent = `❌ ${error.message}`;
   }
-
 });
->>>>>>> f8900fea47f39efde3d8102ce67b6f0eb32142e2
