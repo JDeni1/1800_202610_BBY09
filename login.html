@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login</title>
+  <title>CrowdControl Login</title>
 
   <!-- Bootstrap CSS -->
   <link
@@ -17,31 +18,68 @@
   <div class="container">
     <div class="row justify-content-center align-items-center vh-100">
       <div class="col-11 col-sm-8 col-md-6 col-lg-4">
-        
-        <div class="card shadow-sm">
-          <div class="card-body p-4">
-            <h2 class="text-center mb-4">Login</h2>
 
+        <div class="card shadow-sm border-0">
+          <div class="card-body p-4">
+
+            <!-- Logo -->
+            <div class="text-center mb-3">
+              <img
+                src="./images/CrowdControlAppAlt.png"
+                alt="CrowdControl Logo"
+                style="width: 220px; max-width: 100%;"
+              />
+            </div>
+
+            <!-- Title -->
+            <h3 class="text-center mb-1">Welcome</h3>
+            <p class="text-center text-muted mb-4 small">
+              Log in or create an account to continue
+            </p>
+
+            <!-- Login Form -->
             <form id="loginForm">
+
               <div class="mb-3">
-                <label class="form-label">Email</label>
-                <input type="email" id="email" class="form-control" required />
+                <label class="form-label">Email address</label>
+                <input
+                  type="email"
+                  id="email"
+                  class="form-control"
+                  placeholder="Enter your email"
+                  required
+                />
               </div>
 
               <div class="mb-3">
                 <label class="form-label">Password</label>
-                <input type="password" id="password" class="form-control" required />
+                <input
+                  type="password"
+                  id="password"
+                  class="form-control"
+                  placeholder="Enter your password"
+                  required
+                />
               </div>
 
-              <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-primary">Login</button>
-                <button type="button" id="signupBtn" class="btn btn-outline-secondary">
-                  Sign Up
+              <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="btn btn-primary">
+                  Log In
+                </button>
+
+                <button
+                  type="button"
+                  id="signupBtn"
+                  class="btn btn-outline-secondary"
+                >
+                  Create Account
                 </button>
               </div>
+
             </form>
 
             <p id="msg" class="text-center mt-3 mb-0 small"></p>
+
           </div>
         </div>
 
@@ -50,5 +88,6 @@
   </div>
 
   <script type="module" src="/src/login.js"></script>
+
 </body>
 </html>
