@@ -1,12 +1,18 @@
 console.log("login.js LOADED");
 
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
+
 import { auth } from "./firebaseConfig.js";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { createUserWithEmailAndPassword } from "firebase/auth";
 
 const form = document.getElementById("loginForm");
 const msg = document.getElementById("msg");
+const signupBtn = document.getElementById("signupBtn");
 
+// LOGIN
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -23,33 +29,44 @@ form.addEventListener("submit", async (e) => {
     );
 
     msg.innerHTML = `<div class="alert alert-success">
-    Logged in as ${userCredential.user.email}
+      Logged in as ${userCredential.user.email}
     </div>`;
 
     window.location.href = "/index.html";
   } catch (err) {
     msg.innerHTML = `<div class="alert alert-danger">
-    ${err.code}
+      ${err.code}
     </div>`;
   }
 });
 
 // SIGN UP
-document.getElementById("signupBtn").addEventListener("click", async () => {
+signupBtn.addEventListener("click", async () => {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
 
   msg.innerHTML = `<div class="alert alert-info">Creating account...</div>`;
 
   try {
-    await createUserWithEmailAndPassword(auth, email, password);
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password,
+    );
+
+    // default displayName = email'in @ öncesi
+    const defaultName = email.split("@")[0];
+
+    await updateProfile(userCredential.user, {
+      displayName: defaultName,
+    });
 
     msg.innerHTML = `<div class="alert alert-success">
-    Account created! You can now log in.
+      Account created! You can now log in.
     </div>`;
   } catch (error) {
     msg.innerHTML = `<div class="alert alert-danger">
-    ${error.message}
+      ${error.message}
     </div>`;
   }
 });
