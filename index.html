@@ -7,48 +7,14 @@
     <!-- Required meta tags -->
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!--Web Components-->
+    <script type="module" src="/src/components/site-navbar.js"></script>
+    <script type="module" src="/src/components/site-footer.js"></script>
   </head>
 
   <body>
-    <!--Navbar-->
-    <nav class="navbar navbar-expand-lg bg-primary">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="#"
-          ><img src="./images/ApplogowithoutName.png" height="75" />
-          CrowdControl</a
-        >
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav">
-            <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="#">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="heatmap.html">HeatMap</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="socialfeed.html">Social</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Navigation</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="login.html">Login</a>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
+    <site-navbar></site-navbar>
 
     <!--Content-->
     <!--Carousel-->
@@ -162,9 +128,7 @@
       </button>
     </div>
 
-    <footer class="bg-dark text-white text-center p-3 mt-5">
-      <p class="mb-0">© 2026 Team BBY09</p>
-    </footer>
+    <site-footer></site-footer>
 
     <!-- Link to scripts of your own -->
     <script type="module" src="./src/main.js"></script>
