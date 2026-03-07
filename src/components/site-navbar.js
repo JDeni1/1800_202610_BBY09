@@ -1,7 +1,6 @@
-// Import specific functions from the Firebase Auth SDK
-import { onAuthStateChanged } from "firebase/auth"; //Detect login state
-import { auth } from "/src/firebaseConfig.js"; //Firebase authentication connection
-import { logoutUser } from "/src/authentication.js"; //Perform logout action
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "/src/firebaseConfig.js";
+import { logoutUser } from "/src/authentication.js";
 
 class SiteNavbar extends HTMLElement {
   constructor() {
@@ -30,6 +29,9 @@ class SiteNavbar extends HTMLElement {
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="heatmap.html">Heatmap</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="newPost.html">newPost</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="socialfeed.html">Social</a>

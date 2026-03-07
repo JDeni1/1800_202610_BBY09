@@ -14,18 +14,38 @@
   </head>
 
   <body>
+    <!------------------------------>
+    <!-- Your HTML Layout go here -->
+    <!------------------------------>
+
     <!-- our own navbar goes here -->
     <site-navbar></site-navbar>
     <!-- Main content goes here -->
-    <main class="container py-4">
-      <h1 id="hikeName">Social page</h1>
-    </main>
+    <div class="container">
+      <h1>Make a Post</h1>
+      <form>
+        <div class="form-group">
+          <label>Job Description</label>
+          <textarea id="description" rows="4" cols="50"></textarea>
+        </div>
+        <div class="container py-3">
+          <input type="file" id="inputImage" accept="image/*" />
+          <img id="mypic-goes-here" width="100" height="100" />
+        </div>
+        <div class="d-flex mt-5">
+          <button id="postButton" type="button" class="btn btn-info">
+            Post Now
+          </button>
+        </div>
+      </form>
+    </div>
     <!-- our own footer goes here -->
     <site-footer></site-footer>
     <!---------------------------------------------->
     <!-- Your own JavaScript scripts go here      -->
     <!---------------------------------------------->
+
     <script type="module" src="/src/app.js"></script>
-    <script type="module" src="/src/socialfeed.js"></script>
+    <script type="module" src="/src/newPost.js"></script>
   </body>
 </html>
