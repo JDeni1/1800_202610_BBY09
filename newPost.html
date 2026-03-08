@@ -25,8 +25,28 @@
       <h1>Make a Post</h1>
       <form>
         <div class="form-group">
-          <label>Job Description</label>
-          <textarea id="description" rows="4" cols="50"></textarea>
+          <div class="mb-3">
+            <label for="exampleFormControlInput1" class="form-label"
+              >Title of post</label
+            >
+            <input
+              type="text"
+              class="form-control"
+              id="post-title"
+              placeholder="title"
+            />
+          </div>
+          <div class="mb-3">
+            <label for="exampleFormControlTextarea1" class="form-label"
+              >Post Discription</label
+            >
+            <textarea
+              class="form-control"
+              id="description"
+              rows="3"
+              placeholder="Discribe your post"
+            ></textarea>
+          </div>
         </div>
         <div class="container py-3">
           <input type="file" id="inputImage" accept="image/*" />
@@ -39,6 +59,7 @@
         </div>
       </form>
     </div>
+
     <!-- our own footer goes here -->
     <site-footer></site-footer>
     <!---------------------------------------------->

@@ -22,16 +22,30 @@
     <site-navbar></site-navbar>
     <!-- Main content goes here -->
 
-    <p>Profile Picture Upload</p>
+    <p><b>Profile</b></p>
     <img
       id="profileImage"
-      src="/images/default.jpg"
+      src="/images/*"
       alt="Profile Picture"
       width="50"
       height="50"
     />
     <br />
     <input type="file" id="inputImage" accept="image/*" />
+
+    <template id="postCardTemplate">
+      <div class="col">
+        <div class="card">
+          <img class="card-img-top card-image" src="..." alt="cardimage" />
+          <div class="card-body">
+            <h5 class="card-title"></h5>
+            <p class="card-text"></p>
+            <p>Location: <span class="card-location"></span></p>
+            <a class="btn btn-primary read-more" href="#">Read More</a>
+          </div>
+        </div>
+      </div>
+    </template>
 
     <!-- our own footer goes here -->
     <site-footer></site-footer>

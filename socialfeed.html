@@ -14,18 +14,41 @@
   </head>
 
   <body>
+    <!------------------------------>
+    <!-- Your HTML Layout go here -->
+    <!------------------------------>
+
     <!-- our own navbar goes here -->
     <site-navbar></site-navbar>
     <!-- Main content goes here -->
     <main class="container py-4">
-      <h1 id="hikeName">Social page</h1>
+      <h1 id="hikeName">Social Feed</h1>
+      <div
+        id="allPosts-goes-here"
+        class="row row-cols-1 row-cols-md-3 g-4"
+      ></div>
     </main>
+
+    <template id="postCardTemplate">
+      <div class="col">
+        <div class="card h-100">
+          <img class="card-img-top card-image" src="..." alt="post-image" />
+          <div class="card-body">
+            <h5 class="card-title">Card title</h5>
+            <p class="card-text">Description goes here...</p>
+            <p>Location: <span class="card-location">0, 0</span></p>
+            <a class="btn btn-primary read-more" href="#">Read More</a>
+          </div>
+        </div>
+      </div>
+    </template>
+
     <!-- our own footer goes here -->
     <site-footer></site-footer>
     <!---------------------------------------------->
     <!-- Your own JavaScript scripts go here      -->
     <!---------------------------------------------->
+
     <script type="module" src="/src/app.js"></script>
-    <script type="module" src="/src/socialfeed.js"></script>
   </body>
 </html>

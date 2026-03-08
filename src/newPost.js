@@ -1,16 +1,35 @@
-//import functions as needed
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { auth, db } from "./firebaseConfig.js";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap";
+import { onAuthReady } from "./authentication.js";
+import "/styles/style.css";
+import { db, auth } from "./firebaseConfig.js";
+import {
+  collection,
+  getDocs,
+  addDoc,
+  serverTimestamp,
+  doc,
+  updateDoc,
+  arrayUnion,
+  onSnapshot,
+} from "firebase/firestore";
 
+//------------------------------------------------------------
+// This function is an Event Listener for the file (image) picker
+// When an image is chosen, it will then save that image into the
+// user's document in Firestore
+//-------------------------------------------------------------
 function uploadImage() {
+  // Attach event listener to the file input
+  // Function to handle file selection and Base64 encoding
   document
     .getElementById("inputImage")
     .addEventListener("change", handleFileSelect);
   function handleFileSelect(event) {
-    var file = event.target.files[0];
+    var file = event.target.files[0]; // Get the selected file
 
     if (file) {
-      var reader = new FileReader();
+      var reader = new FileReader(); // Create a FileReader to read the file
 
       // When file reading is complete
       reader.onload = function (e) {
@@ -53,6 +72,7 @@ async function savePost() {
   }
 
   const desc = document.getElementById("description").value;
+  const title = document.getElementById("post-title").value;
 
   // 1️⃣ Get Base64 image from Local Storage
   const inputImage = localStorage.getItem("inputImage") || "";
@@ -67,6 +87,7 @@ async function savePost() {
     // 3️⃣ Save post to Firestore with geolocation
     const docRef = await addDoc(collection(db, "posts"), {
       owner: user.uid,
+      caption: title,
       description: desc,
       image: inputImage,
       last_updated: serverTimestamp(),
@@ -79,7 +100,7 @@ async function savePost() {
     console.log("1. Post document added!");
     console.log(docRef.id);
 
-    // Optional: savePostIDforUser(docRef.id);
+    savePostIDforUser(docRef.id);
     // Do you want to keep track if what posts the user has done?
   } catch (error) {
     console.error("Error adding post:", error);
@@ -102,6 +123,7 @@ function getCurrentPositionSafe() {
     );
   });
 }
+
 //------------------------------------------------------------
 // This function saves the post document ID to the user's document
 // in Firestore under the "myposts" array field.
