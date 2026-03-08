@@ -24,7 +24,7 @@ function showName() {
   onAuthReady((user) => {
     if (!user) {
       if (window.location.pathname.endsWith("main.html")) {
-        location.href = "index.html";
+        location.href = "login.html";
       }
       return;
     }
@@ -33,3 +33,59 @@ function showName() {
     if (nameElement) nameElement.textContent = `${name}!`;
   });
 }
+
+// ---------------------------SOCIAL FEED ------------------------------------
+
+async function displayCardsDynamically() {
+  // 1. Reference the container and the template
+  let cardTemplate = document.getElementById("postCardTemplate");
+  let cardContainer = document.getElementById("allPosts-goes-here");
+
+  // 2. Reference the Firestore collection
+  const postsCollectionRef = collection(db, "posts");
+
+  try {
+    // 3. Fetch all documents from 'posts'
+    const querySnapshot = await getDocs(postsCollectionRef);
+
+    querySnapshot.forEach((doc) => {
+      const post = doc.data(); // This gets the fields: description, location, etc.
+
+      // 4. Clone the template content
+      let newcard = cardTemplate.content.cloneNode(true);
+
+      // 5. Populate the text (Mapping 'description' from your Firestore screenshot)
+      newcard.querySelector(".card-title").textContent =
+        post.caption || "New Post";
+      newcard.querySelector(".card-text").textContent =
+        post.description || "No description provided.";
+
+      // 6. Handle the Location (Lat/Lng)
+      if (post.location) {
+        const lat = post.location.lat.toFixed(2);
+        const lng = post.location.lng.toFixed(2);
+        newcard.querySelector(".card-location").textContent = `${lat}, ${lng}`;
+      }
+
+      // 7. Handle the Image
+      // If post.image is empty in Firestore, use a placeholder
+      const imgPath =
+        post.image && post.image !== ""
+          ? post.image
+          : "./images/default_post.jpg";
+      newcard.querySelector(".card-image").src = imgPath;
+
+      // 8. Set the link to the individual post page using the Doc ID
+      newcard.querySelector(".read-more").href =
+        `socialfeed.html?docID=${doc.id}`;
+
+      // 9. Append the finished card to the container
+      cardContainer.appendChild(newcard);
+    });
+  } catch (error) {
+    console.error("Error loading social feed: ", error);
+  }
+}
+
+// Initialize the function
+displayCardsDynamically();
