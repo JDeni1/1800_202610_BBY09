@@ -14,18 +14,31 @@
   </head>
 
   <body>
+    <!------------------------------>
+    <!-- Your HTML Layout go here -->
+    <!------------------------------>
+
     <!-- our own navbar goes here -->
     <site-navbar></site-navbar>
     <!-- Main content goes here -->
-    <main class="container py-4">
-      <h1 id="hikeName">Social page</h1>
-    </main>
+
+    <p>Profile Picture Upload</p>
+    <img
+      id="profileImage"
+      src="/images/default.jpg"
+      alt="Profile Picture"
+      width="50"
+      height="50"
+    />
+    <br />
+    <input type="file" id="inputImage" accept="image/*" />
+
     <!-- our own footer goes here -->
     <site-footer></site-footer>
     <!---------------------------------------------->
     <!-- Your own JavaScript scripts go here      -->
     <!---------------------------------------------->
+
     <script type="module" src="/src/app.js"></script>
-    <script type="module" src="/src/socialfeed.js"></script>
   </body>
 </html>
