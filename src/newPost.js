@@ -2,22 +2,15 @@
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "./firebaseConfig.js";
 
-//------------------------------------------------------------
-// This function is an Event Listener for the file (image) picker
-// When an image is chosen, it will then save that image into the
-// user's document in Firestore
-//-------------------------------------------------------------
 function uploadImage() {
-  // Attach event listener to the file input
-  // Function to handle file selection and Base64 encoding
   document
     .getElementById("inputImage")
     .addEventListener("change", handleFileSelect);
   function handleFileSelect(event) {
-    var file = event.target.files[0]; // Get the selected file
+    var file = event.target.files[0];
 
     if (file) {
-      var reader = new FileReader(); // Create a FileReader to read the file
+      var reader = new FileReader();
 
       // When file reading is complete
       reader.onload = function (e) {
