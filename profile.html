@@ -21,22 +21,26 @@
     <!-- our own navbar goes here -->
     <site-navbar></site-navbar>
     <!-- Main content goes here -->
-    <main class="container py-4">
-      <h1 id="hikeName">Social Feed</h1>
-      <div
-        id="allPosts-goes-here"
-        class="row row-cols-1 row-cols-md-3 g-4"
-      ></div>
-    </main>
+
+    <p><b>Profile</b></p>
+    <img
+      id="profileImage"
+      src="/images/*"
+      alt="Profile Picture"
+      width="50"
+      height="50"
+    />
+    <br />
+    <input type="file" id="inputImage" accept="image/*" />
 
     <template id="postCardTemplate">
       <div class="col">
-        <div class="card h-100">
-          <img class="card-img-top card-image" src="..." alt="post-image" />
+        <div class="card">
+          <img class="card-img-top card-image" src="..." alt="cardimage" />
           <div class="card-body">
-            <h5 class="card-title">Card title</h5>
-            <p class="card-text">Description goes here...</p>
-            <p>Location: <span class="card-location">0, 0</span></p>
+            <h5 class="card-title"></h5>
+            <p class="card-text"></p>
+            <p>Location: <span class="card-location"></span></p>
             <a class="btn btn-primary read-more" href="#">Read More</a>
           </div>
         </div>
