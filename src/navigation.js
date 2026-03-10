@@ -32,7 +32,7 @@ geocoder.on("markgeocode", function (e) {
     routingControl = L.Routing.control({
       waypoints: selectedPoints,
       routeWhileDragging: true,
-      showAlternatives: false
+      showAlternatives: false,
     }).addTo(map);
 
     selectedPoints = []; // reset for next route
@@ -51,7 +51,7 @@ map.on("click", function (e) {
     routingControl = L.Routing.control({
       waypoints: selectedPoints,
       routeWhileDragging: true,
-      showAlternatives: true
+      showAlternatives: false
     }).addTo(map);
 
     selectedPoints = [];
