@@ -1,24 +1,25 @@
 var map = L.map("map").setView([49.2827, -123.1207], 13);
 
 // Base layer
-var osmLayer = L.tileLayer(
-  "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-  {
-    maxZoom: 19,
-    attribution: "&copy; OpenStreetMap"
-  }
-).addTo(map);
+var osmLayer = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  maxZoom: 19,
+  attribution: "&copy; OpenStreetMap",
+}).addTo(map);
 
 // Markers
-var bcPlace = L.marker([49.276759, -123.112106]).bindPopup("<b>BC Place Stadium</b>");
-var pneAmphitheatre = L.marker([49.2828, -123.0366]).bindPopup("<b>PNE Amphitheatre (Fan Festival)</b>");
+var bcPlace = L.marker([49.276759, -123.112106]).bindPopup(
+  "<b>BC Place Stadium</b>",
+);
+var pneAmphitheatre = L.marker([49.2828, -123.0366]).bindPopup(
+  "<b>PNE Amphitheatre (Fan Festival)</b>",
+);
 
 // Heatmap
 var crowdData = [
   [49.2828, -123.0366, 1.0],
   [49.283, -123.037, 0.7],
   [49.2825, -123.036, 0.8],
-  [49.2767, -123.1121, 0.9]
+  [49.2767, -123.1121, 0.9],
 ];
 
 var heatLayer = L.heatLayer(crowdData, { radius: 25, blur: 15 });
@@ -28,7 +29,7 @@ var baseMaps = { OpenStreetMap: osmLayer };
 var overlayMaps = {
   "BC Place": bcPlace,
   "PNE Fan Festival": pneAmphitheatre,
-  "Crowd Density": heatLayer
+  "Crowd Density": heatLayer,
 };
 
 bcPlace.addTo(map);
@@ -36,124 +37,35 @@ pneAmphitheatre.addTo(map);
 heatLayer.addTo(map);
 
 // -----------------------------
-// ROUTE 16 — BOTH DIRECTIONS
+// LOAD ALL ROUTES FROM bus.routes.GEOJSON
 // -----------------------------
 
-// Original route coordinates
-var route16Coords = [
-  [-123.048809, 49.237567],
-  [-123.048075, 49.238362],
-  [-123.047874, 49.238572],
-  [-123.047431, 49.239038],
-  [-123.047111, 49.239375],
-  [-123.046779, 49.239725],
-  [-123.046128, 49.240409],
-  [-123.04539, 49.241183],
-  [-123.043582, 49.243075],
-  [-123.043512, 49.243147],
-  [-123.043469, 49.243191],
-  [-123.043415, 49.243245],
-  [-123.043029, 49.243641],
-  [-123.042164, 49.244549],
-  [-123.041942, 49.244749],
-  [-123.04179, 49.244992],
-  [-123.041689, 49.245154],
-  [-123.041626, 49.245405],
-  [-123.041624, 49.245848],
-  [-123.041623, 49.246232],
-  [-123.041623, 49.246657],
-  [-123.041622, 49.247066],
-  [-123.041621, 49.247497],
-  [-123.041621, 49.24789],
-  [-123.041616, 49.248752],
-  [-123.04178, 49.249184],
-  [-123.042322, 49.249625],
-  [-123.042797, 49.249822],
-  [-123.043458, 49.250098],
-  [-123.043823, 49.250329],
-  [-123.044138, 49.250633],
-  [-123.044218, 49.250837],
-  [-123.044297, 49.251262],
-  [-123.044296, 49.2515],
-  [-123.044285, 49.252347],
-  [-123.044275, 49.253184],
-  [-123.044271, 49.253412],
-  [-123.044263, 49.25402],
-  [-123.044262, 49.254389],
-  [-123.044246, 49.255403],
-  [-123.044236, 49.256306],
-  [-123.044227, 49.257222],
-  [-123.04421, 49.257703],
-  [-123.044193, 49.258194],
-  [-123.044187, 49.258379],
-  [-123.04428, 49.258537],
-  [-123.044332, 49.258888],
-  [-123.044381, 49.259213],
-  [-123.044364, 49.259701],
-  [-123.044322, 49.260898],
-  [-123.044321, 49.261061],
-  [-123.044314, 49.261948],
-  [-123.04433, 49.262934],
-  [-123.04432, 49.263867],
-  [-123.044314, 49.264763],
-  [-123.044308, 49.265698],
-  [-123.04427, 49.266666],
-  [-123.044263, 49.267595],
-  [-123.044235, 49.268483],
-  [-123.044222, 49.269374],
-  [-123.044217, 49.269576],
-  [-123.04421, 49.269972],
-  [-123.044203, 49.270411],
-  [-123.04421, 49.270889],
-  [-123.044212, 49.271096],
-  [-123.044216, 49.271359],
-  [-123.044167, 49.272287],
-  [-123.044161, 49.273259],
-  [-123.044144, 49.273723],
-  [-123.044127, 49.274203],
-  [-123.044128, 49.275373],
-  [-123.044116, 49.276426],
-  [-123.04411, 49.277042],
-  [-123.044105, 49.277464],
-  [-123.044102, 49.277843],
-  [-123.044098, 49.278277],
-  [-123.044094, 49.278671],
-  [-123.044089, 49.2791],
-  [-123.044085, 49.279624],
-  [-123.044078, 49.280206],
-  [-123.044055, 49.280707],
-  [-123.044034, 49.281155],
-  [-123.046659, 49.281154],
-  [-123.049336, 49.281159],
-  [-123.051975, 49.281163],
-  [-123.054582, 49.281166],
-  [-123.056544, 49.281169],
-  [-123.056546, 49.280707],
-];
+fetch("/data/bus_routes.geojson")
+  .then((response) => response.json())
+  .then((geojson) => {
+    geojson.features.forEach((feature) => {
+      const props = feature.properties || {};
 
-// Build GeoJSON for each direction
-var route16_east = {
-  type: "Feature",
-  geometry: { type: "LineString", coordinates: route16Coords }
-};
+      // Build a clean route name
+      const shortName = props.route_short_name || props.route_id || "Unknown";
+      const longName = props.route_long_name || "";
+      const routeName = longName
+        ? `${shortName} — ${longName}`
+        : `Route ${shortName}`;
 
-var route16_west = {
-  type: "Feature",
-  geometry: { type: "LineString", coordinates: [...route16Coords].reverse() }
-};
+      // Create a Leaflet layer for this route
+      const routeLayer = L.geoJSON(feature, {
+        style: {
+          color: "#d81b60",
+          weight: 4,
+        },
+      });
 
-// Create Leaflet layers (not added to map)
-var route16EastLayer = L.geoJSON(route16_east, {
-  style: { color: "#d81b60", weight: 4 }
-});
+      // Add to overlay maps
+      overlayMaps[routeName] = routeLayer;
+    });
 
-var route16WestLayer = L.geoJSON(route16_west, {
-  style: { color: "#1e88e5", weight: 4 }
-});
-
-// Add both to the layer control
-overlayMaps["Route 16 – Eastbound"] = route16EastLayer;
-overlayMaps["Route 16 – Westbound"] = route16WestLayer;
-
-// Rebuild the control with the new layers
-L.control.layers(baseMaps, overlayMaps).addTo(map);
+    // Rebuild the layer control
+    L.control.layers(baseMaps, overlayMaps).addTo(map);
+  })
+  .catch((err) => console.error("Error loading routes:", err));
