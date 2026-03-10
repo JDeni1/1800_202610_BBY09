@@ -1,16 +1,68 @@
+// ===============================
+// MAP INITIALIZATION
+// ===============================
+const map = L.map("map").setView([49.2827, -123.1207], 13);
 
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  maxZoom: 19,
+}).addTo(map);
 
-const map = L.map('map').setView([49.276712, -123.112062], 13); // Vancouver
+// ===============================
+// SEARCH BOX (GEOCODER)
+// ===============================
+const geocoder = L.Control.geocoder({
+  defaultMarkGeocode: false
+}).addTo(map);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19
+// ===============================
+// INTERACTIVE ROUTING
+// ===============================
+let routingControl = null;
+let selectedPoints = [];
+
+// When user selects a search result
+geocoder.on("markgeocode", function (e) {
+  const latlng = e.geocode.center;
+  selectedPoints.push(latlng);
+
+  // If two points selected → calculate route
+  if (selectedPoints.length === 2) {
+    if (routingControl) map.removeControl(routingControl);
+
+    routingControl = L.Routing.control({
+      waypoints: selectedPoints,
+      routeWhileDragging: true,
+      showAlternatives: false
     }).addTo(map);
 
-    L.Routing.control({
-      waypoints: [
-        L.latLng(49.2827, -123.1207), // Start: Vancouver
-        L.latLng(49.25, -123.1)       // End: Example point
-      ],
-      routeWhileDragging: true
+    selectedPoints = []; // reset for next route
+  }
+});
+
+// ===============================
+// OPTIONAL: Allow map clicks as well
+// ===============================
+map.on("click", function (e) {
+  selectedPoints.push(e.latlng);
+
+  if (selectedPoints.length === 2) {
+    if (routingControl) map.removeControl(routingControl);
+
+    routingControl = L.Routing.control({
+      waypoints: selectedPoints,
+      routeWhileDragging: true,
+      showAlternatives: true
     }).addTo(map);
+
+    selectedPoints = [];
+  }
+});
+
+fetch("/data/yourShapes.geojson")
+  .then(res => res.json())
+  .then(data => {
+    L.geoJSON(data, {
+      style: { color: "blue", weight: 3 }
+    }).addTo(map);
+  });
 
