@@ -1,5 +1,7 @@
+//Center the map upon launch:
 var map = L.map("map").setView([49.2827, -123.1207], 13);
 
+//instantiate the 
 var osmLayer = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 19,
   attribution: "&copy; OpenStreetMap",
