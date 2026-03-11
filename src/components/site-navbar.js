@@ -28,7 +28,7 @@ class SiteNavbar extends HTMLElement {
                                 <a class="nav-link" href="index.html">Home</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="heatmap.html">Heatmap</a>
+                                <a class="nav-link" href="map.html">Heatmap</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="newPost.html">newPost</a>

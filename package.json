@@ -14,6 +14,7 @@
     "@popperjs/core": "^2.11.8",
     "bootstrap": "^5.3.8",
     "firebase": "^12.10.0",
-    "leaflet-routing-machine": "^3.2.12"
+    "leaflet-routing-machine": "^3.2.12",
+    "maplibre-gl": "^5.20.0"
   }
 }
