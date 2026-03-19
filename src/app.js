@@ -45,16 +45,16 @@ async function displayCardsDynamically() {
   const postsCollectionRef = collection(db, "posts");
 
   try {
-    // 3. Fetch all documents from 'posts'
+    // 3. Fetch all documents from "posts"
     const querySnapshot = await getDocs(postsCollectionRef);
 
     querySnapshot.forEach((doc) => {
-      const post = doc.data(); // This gets the fields: description, location, etc.
+      const post = doc.data(); // This gets the fields: description, location
 
       // 4. Clone the template content
       let newcard = cardTemplate.content.cloneNode(true);
 
-      // 5. Populate the text (Mapping 'description' from your Firestore screenshot)
+      // 5. Populate the text (recognizing "discription" and "Caption"
       newcard.querySelector(".card-title").textContent =
         post.caption || "New Post";
       newcard.querySelector(".card-text").textContent =
@@ -87,5 +87,4 @@ async function displayCardsDynamically() {
   }
 }
 
-// Initialize the function
 displayCardsDynamically();
