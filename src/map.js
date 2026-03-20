@@ -1,20 +1,24 @@
-// Check that this is at the top of your JS file
+//maplibre-gl rest here:
 import maplibregl from "maplibre-gl";
+// Database initialize here:
+import { db } from "./firebaseConfig.js";
+// Functions needed to read from database:
+import { collection, getDocs } from "firebase/firestore";
 
 // ------------------------------------------------------------
-// This function takes the hike data and adds green pins to the map.
-// It also stores the hike data in a global variable for later use (e.g., zooming).
+// This function takes the heatmap data and adds green pins to the map.
+// It also stores the heatmap data in a global variable for later use (e.g., zooming).
 // ------------------------------------------------------------
-async function showHikes(map) {
-    // Fetch hike data from Firestore
-    const snapshot = await getHikes();
+async function showHeat(map) {
+    // Fetch heat data from Firestore
+    const snapshot = await getHeat();
 
-    // Loop through each hike document and add a green pin to the map
+    // Loop through each firestore document and add a green pin to the map
     snapshot.forEach(doc => {
 
-        // Store hike data in global variable (array)
+        // Store heat data in global variable (array)
         // for later use (e.g., zooming to all points)
-        appState.hikes.push(doc);  
+        appState.heat.push(doc);  
 
         // create green pin
         const el = document.createElement("div");
@@ -31,38 +35,31 @@ async function showHikes(map) {
     });
 }
 
-// Add this to the top of your JS file
-// Database initialized
-import { db } from "./firebaseConfig.js";
-// Functions needed to read from database
-import { collection, getDocs } from "firebase/firestore";
-
-
 // ------------------------------------------------------------
-// This function fetches hike data (converted to JSON)
+// This function fetches heatmap data (converted to JSON)
 // from Firestore and adds green pins to the map.
-// It assumes each hike document has "lat" and "lng" fields.
+// It assumes each heatmap document has "lat" and "lng" fields.
 // ------------------------------------------------------------
-async function getHikes() {
+async function getHeat() {
 
-    // Fetch all documents from the "hikes" collection in Firestore
-    const snapshot = await getDocs(collection(db, "hikes"));
+    // Fetch all documents from the "heatmap" collection in Firestore
+    const snapshot = await getDocs(collection(db, "heat"));
 
     // Convert Firestore documents to plain JavaScript objects
     // And returns a new array (list of the documents, json format)
     // Equivalent to doing this:
-    //   const hikes = [];
+    //   const heatmap = [];
     //   for (const doc of snapshot.docs) {
-    //       hikes.push(doc.data());
+    //       heatmap.push(doc.data());
     
     return snapshot.docs.map(doc => doc.data());
 }
 
 // ------------------------------------------------------------
-// Global variable to store user location, hike data - good practice
+// Global variable to store user location, heat data - good practice
 // ------------------------------------------------------------
 const appState = {
-  hikes: [],
+  heat: [],
   userLngLat: null
 };
 
