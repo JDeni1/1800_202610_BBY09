@@ -1,26 +1,16 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap";
+import "/styles/style.css";
 
-// If you have custom global styles, import them as well:
-import "../styles/style.css";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "./firebaseConfig.js";
 
-// If you have custom global styles, import them as well:
-import "../styles/style.css";
-
-function sayHello() {}
-// document.addEventListener('DOMContentLoaded', sayHello);
-
-/*For Profile Validation */
-// Example starter JavaScript for disabling form submissions if there are invalid fields
+/* For Profile Validation */
 (() => {
   "use strict";
 
-  // Fetch all the forms we want to apply custom Bootstrap validation styles to
   const forms = document.querySelectorAll(".needs-validation");
 
-  // Loop over them and prevent submission
   Array.from(forms).forEach((form) => {
     form.addEventListener(
       "submit",
@@ -36,3 +26,34 @@ function sayHello() {}
     );
   });
 })();
+
+function showNameOnHome() {
+  const nameElement = document.getElementById("name-goes-here");
+  if (!nameElement) return;
+
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      window.location.href = "login.html";
+      return;
+    }
+
+    const name = user.displayName || user.email;
+    nameElement.textContent = `${name}!`;
+  });
+}
+
+showNameOnHome();
+
+showNameOnHome();
+
+import { signOut } from "firebase/auth";
+
+const logoutBtn = document.getElementById("logoutBtn");
+
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", async (e) => {
+    e.preventDefault();
+    await signOut(auth);
+    window.location.replace("login.html");
+  });
+}
