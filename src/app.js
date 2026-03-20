@@ -18,22 +18,33 @@ document.addEventListener("DOMContentLoaded", sayHello);
 //--------------------------------------------------------------
 // Custom global JS code (shared with all pages)can go here.
 //--------------------------------------------------------------
+// function showName() {
+//   const nameElement = document.getElementById("name-goes-here");
+
+//   onAuthReady((user) => {
+//     if (!user) {
+//       if (window.location.pathname.endsWith("map.html")) {
+//         location.href = "login.html";
+//       }
+//       return;
+//     }
+
+//     const name = user.displayName || user.email;
+//     if (nameElement) nameElement.textContent = `${name}!`;
+//   });
+// }
+
 function showName() {
   const nameElement = document.getElementById("name-goes-here");
-
   onAuthReady((user) => {
     if (!user) {
-      if (window.location.pathname.endsWith("main.html")) {
-        location.href = "login.html";
-      }
+      if (nameElement) nameElement.textContent = "Guest";
       return;
     }
-
     const name = user.displayName || user.email;
     if (nameElement) nameElement.textContent = `${name}!`;
   });
 }
-
 // ---------------------------SOCIAL FEED ------------------------------------
 
 async function displayCardsDynamically() {

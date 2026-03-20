@@ -1,137 +1,41 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <title>CrowdControl</title>
-    <meta name="CrowdControl" content="CrowdControl" />
+    <title>My BCIT Project</title>
+    <meta name="comp1800 template" content="My 1800 App" />
 
     <!-- Required meta tags -->
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!--Web Components-->
+    <!-- Web Components for shared navbar and footer layout -->
     <script type="module" src="/src/components/site-navbar.js"></script>
     <script type="module" src="/src/components/site-footer.js"></script>
   </head>
 
   <body>
+    <!------------------------------>
+    <!-- Your HTML Layout go here -->
+    <!------------------------------>
+
+    <!-- our own navbar goes here -->
     <site-navbar></site-navbar>
-
-    <!--Content-->
-    <!--Carousel-->
-    <div id="carouselExampleIndicators" class="carousel slide">
-      <div class="carousel-indicators">
-        <button
-          type="button"
-          data-bs-target="#carouselExampleIndicators"
-          data-bs-slide-to="0"
-          class="active"
-          aria-current="true"
-          aria-label="Slide 1"
-        ></button>
-        <button
-          type="button"
-          data-bs-target="#carouselExampleIndicators"
-          data-bs-slide-to="1"
-          aria-label="Slide 2"
-        ></button>
-        <button
-          type="button"
-          data-bs-target="#carouselExampleIndicators"
-          data-bs-slide-to="2"
-          aria-label="Slide 3"
-        ></button>
+    <!-- Main content goes here -->
+    <div class="card text-center">
+      <div class="card-header">CROWD CONTROL</div>
+      <div class="card-body">
+        <h5 class="card-title">BBY-09</h5>
+        <p class="card-text">Chech out our map</p>
+        <a href="map.html" class="btn btn-primary">Go to HeatMap</a>
       </div>
-      <div class="carousel-inner">
-        <div class="carousel-item active">
-          <img src="./images/fifa.jpg" class="d-block w-100" alt="..." />
-        </div>
-        <div class="carousel-item">
-          <img src="./images/fifa2.jpg" class="d-block w-100" alt="..." />
-        </div>
-        <div class="carousel-item">
-          <img
-            src="./images/CrowdControlAppAlt.png"
-            class="d-block w-100"
-            alt="..."
-          />
-        </div>
-      </div>
-      <button
-        class="carousel-control-prev"
-        type="button"
-        data-bs-target="#carouselExampleIndicators"
-        data-bs-slide="prev"
-      >
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Previous</span>
-      </button>
-      <button
-        class="carousel-control-next"
-        type="button"
-        data-bs-target="#carouselExampleIndicators"
-        data-bs-slide="next"
-      >
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Next</span>
-      </button>
+      <div class="card-footer text-body-secondary"></div>
     </div>
-
-    <!--CARDS-->
-    <div class="container mt-5">
-      <div class="row justify-content-center g-4">
-        <div class="card" style="width: 18rem">
-          <img src="./images/heatmap.jpg" class="card-img-top" alt="..." />
-          <div class="card-body">
-            <h5 class="card-title">Heatmap</h5>
-            <p class="card-text">
-              Want to know the latest congested area? Well This map has got you
-              covered!
-            </p>
-            <a href="heatmap.html" class="stretched-link"></a>
-            <a href="heatmap.html" class="btn btn-primary">Click here</a>
-          </div>
-        </div>
-
-        <div class="card" style="width: 18rem">
-          <img src="./images/social.jpg" class="card-img-top" alt="..." />
-          <div class="card-body">
-            <h5 class="card-title">Socialmedia</h5>
-            <p class="card-text">
-              See where the crowd is real time with your fellow residance!
-            </p>
-            <a href="socialfeed.html" class="stretched-link"></a>
-            <a href="socialfeed.html" class="btn btn-primary">Click here</a>
-          </div>
-        </div>
-
-        <div class="card" style="width: 18rem">
-          <img src="./images/navigation.jpg" class="card-img-top" alt="..." />
-          <div class="card-body">
-            <h5 class="card-title">Navigation</h5>
-            <p class="card-text">
-              The fastest and smartest route at your quickest conviance!
-            </p>
-            <a href="navigation.html" class="stretched-link"></a>
-            <a href="navigation.html" class="btn btn-primary">Click here</a>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="d-flex justify-content-center gap-1">
-      <button type="button" class="btn btn-primary btn-lg px-4">
-        See the Crowd
-      </button>
-      <button type="button" class="btn btn-outline-secondary btn-lg px-4">
-        Login
-        <a href="login.html" class="stretched-link"></a>
-      </button>
-    </div>
-
+    <!-- our own footer goes here -->
     <site-footer></site-footer>
+    <!---------------------------------------------->
+    <!-- Your own JavaScript scripts go here      -->
+    <!---------------------------------------------->
 
-    <!-- Link to scripts of your own -->
-    <script type="module" src="./src/main.js"></script>
-    <script type="module" src="./src/firebaseConfig.js"></script>
+    <script type="module" src="/src/app.js"></script>
   </body>
 </html>

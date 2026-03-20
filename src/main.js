@@ -27,33 +27,52 @@ import { auth } from "./firebaseConfig.js";
   });
 })();
 
+// function showNameOnHome() {
+//   const nameElement = document.getElementById("name-goes-here");
+//   if (!nameElement) return;
+
+//   onAuthStateChanged(auth, (user) => {
+//     if (!user) {
+//       window.location.href = "login.html";
+//       return;
+//     }
+
+//     const name = user.displayName || user.email;
+//     nameElement.textContent = `${name}!`;
+//   });
+// }
 function showNameOnHome() {
   const nameElement = document.getElementById("name-goes-here");
   if (!nameElement) return;
-
   onAuthStateChanged(auth, (user) => {
     if (!user) {
-      window.location.href = "login.html";
-      return;
+      nameElement.textContent = "Guest!";
+      return; // no redirect — guests are welcome
     }
-
     const name = user.displayName || user.email;
     nameElement.textContent = `${name}!`;
   });
 }
-
-showNameOnHome();
-
-showNameOnHome();
-
-import { signOut } from "firebase/auth";
+showNameOnHome(); // ← call only once (remove the duplicate)
 
 const logoutBtn = document.getElementById("logoutBtn");
-
 if (logoutBtn) {
   logoutBtn.addEventListener("click", async (e) => {
     e.preventDefault();
     await signOut(auth);
-    window.location.replace("login.html");
+    window.location.replace("index.html"); // ← send back to map as guest, not login
   });
 }
+showNameOnHome();
+
+import { signOut } from "firebase/auth";
+
+// const logoutBtn = document.getElementById("logoutBtn");
+
+// if (logoutBtn) {
+//   logoutBtn.addEventListener("click", async (e) => {
+//     e.preventDefault();
+//     await signOut(auth);
+//     window.location.replace("login.html");
+//   });
+// }
