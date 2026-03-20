@@ -1,67 +1,40 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap";
-import { onAuthReady } from "./authentication.js";
 import "/styles/style.css";
+
 import { db, auth } from "./firebaseConfig.js";
 import {
   collection,
-  getDocs,
   addDoc,
   serverTimestamp,
   doc,
   updateDoc,
   arrayUnion,
-  onSnapshot,
 } from "firebase/firestore";
 
-//------------------------------------------------------------
-// This function is an Event Listener for the file (image) picker
-// When an image is chosen, it will then save that image into the
-// user's document in Firestore
-//-------------------------------------------------------------
+/*Uploads images - though only stores within local storage */
 function uploadImage() {
-  // Attach event listener to the file input
-  // Function to handle file selection and Base64 encoding
-  document
-    .getElementById("inputImage")
-    .addEventListener("change", handleFileSelect);
-  function handleFileSelect(event) {
-    var file = event.target.files[0]; // Get the selected file
+  const inputImage = document.getElementById("inputImage");
+  if (!inputImage) return;
 
-    if (file) {
-      var reader = new FileReader(); // Create a FileReader to read the file
+  inputImage.addEventListener("change", (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
 
-      // When file reading is complete
-      reader.onload = function (e) {
-        var base64String = e.target.result.split(",")[1]; // Extract Base64 data
+    const reader = new FileReader();
 
-        ///display the image for user to preview
-        document.getElementById("mypic-goes-here").src = e.target.result;
+    reader.onload = (e) => {
+      const base64String = e.target.result.split(",")[1];
+      document.getElementById("mypic-goes-here").src = e.target.result;
+      localStorage.setItem("inputImage", base64String);
+      console.log("Image saved to localStorage as Base64 string.");
+    };
 
-        // Save to localStorage for now until Post is submitted
-        localStorage.setItem("inputmage", base64String);
-        console.log("Image saved to localStorage as Base64 string.");
-      };
-
-      // Read the file as a Data URL (Base64 encoding)
-      reader.readAsDataURL(file);
-    }
-  }
+    reader.readAsDataURL(file);
+  });
 }
-uploadImage();
 
-//------------------------------------------------------------
-// Add event listener to the "Save Post" button
-//-------------------------------------------------------------
-document.addEventListener("DOMContentLoaded", () => {
-  const postButton = document.getElementById("postButton");
-  postButton.addEventListener("click", savePost);
-});
-
-//------------------------------------------------------------
-// This function saves the post data (description and image) to Firestore
-// when the "Save Post" button is clicked.
-//-------------------------------------------------------------
+/*Saves posts in fire store */
 async function savePost() {
   alert("SAVE POST is triggered");
 
@@ -73,45 +46,30 @@ async function savePost() {
 
   const desc = document.getElementById("description").value;
   const title = document.getElementById("post-title").value;
-
-  // 1️⃣ Get Base64 image from Local Storage
   const inputImage = localStorage.getItem("inputImage") || "";
 
-  // 2️⃣ Get the user's geolocation (wrapped in a Promise)
   const position = await getCurrentPositionSafe();
-
   const latitude = position?.coords?.latitude || null;
   const longitude = position?.coords?.longitude || null;
 
   try {
-    // 3️⃣ Save post to Firestore with geolocation
     const docRef = await addDoc(collection(db, "posts"), {
       owner: user.uid,
       caption: title,
       description: desc,
       image: inputImage,
       last_updated: serverTimestamp(),
-      location: {
-        lat: latitude,
-        lng: longitude,
-      },
+      location: { lat: latitude, lng: longitude },
     });
 
-    console.log("1. Post document added!");
-    console.log(docRef.id);
-
+    console.log("Post document added:", docRef.id);
     savePostIDforUser(docRef.id);
-    // Do you want to keep track if what posts the user has done?
   } catch (error) {
     console.error("Error adding post:", error);
   }
 }
 
-//------------------------------------------------------------
-// This function gets the current geolocation position safely.
-// It returns a Promise that resolves to the position or null if
-// geolocation is not available or permission is denied.
-//-------------------------------------------------------------
+/* Returns a Promise resolving to geolocation position or null */
 function getCurrentPositionSafe() {
   return new Promise((resolve) => {
     if (!navigator.geolocation) return resolve(null);
@@ -124,21 +82,13 @@ function getCurrentPositionSafe() {
   });
 }
 
-//------------------------------------------------------------
-// This function saves the post document ID to the user's document
-// in Firestore under the "myposts" array field.
-// This function is called after a post is successfully created.
-//-------------------------------------------------------------
+/* Adds new post ID within Firebase */
 async function savePostIDforUser(postDocID) {
   const user = auth.currentUser;
-
   if (!user) {
     console.error("No user signed in.");
     return;
   }
-
-  console.log("user id is: " + user.uid);
-  console.log("postdoc id is: " + postDocID);
 
   try {
     await updateDoc(doc(db, "users", user.uid), {
@@ -148,6 +98,14 @@ async function savePostIDforUser(postDocID) {
     console.log("Saved to user's document!");
     alert("Post is complete!");
   } catch (error) {
-    console.error("Error writing document: ", error);
+    console.error("Error writing document:", error);
   }
 }
+
+/*Uploads content */
+uploadImage();
+
+document.addEventListener("DOMContentLoaded", () => {
+  const postButton = document.getElementById("postButton");
+  if (postButton) postButton.addEventListener("click", savePost);
+});

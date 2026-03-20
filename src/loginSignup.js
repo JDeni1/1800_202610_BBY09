@@ -1,11 +1,11 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap";
 import "/styles/style.css";
+
 import { loginUser, signupUser, authErrorMessage } from "./authentication.js";
 
-// --- Login and Signup Page ---
+/* Sets up all login and signup form interactions */
 function initAuthUI() {
-  // --- DOM Elements ---
   const alertEl = document.getElementById("authAlert");
   const loginView = document.getElementById("loginView");
   const signupView = document.getElementById("signupView");
@@ -13,38 +13,37 @@ function initAuthUI() {
   const toLoginBtn = document.getElementById("toLogin");
   const loginForm = document.getElementById("loginForm");
   const signupForm = document.getElementById("signupForm");
+
   const redirectUrl = "map.html";
 
-  // --- Helper Functions ---
-  // Toggle element visibility
+  // --- Helpers ---
+
   function setVisible(el, visible) {
     el.classList.toggle("d-none", !visible);
   }
 
-  // Show error message with accessibility and auto-hide
   let errorTimeout;
+
   function showError(msg) {
     alertEl.textContent = msg || "";
     alertEl.classList.remove("d-none");
     clearTimeout(errorTimeout);
-    errorTimeout = setTimeout(hideError, 5000); // Auto-hide after 5s
+    errorTimeout = setTimeout(hideError, 5000);
   }
 
-  // Hide error message
   function hideError() {
     alertEl.classList.add("d-none");
     alertEl.textContent = "";
     clearTimeout(errorTimeout);
   }
 
-  // Enable/disable submit button for forms
   function setSubmitDisabled(form, disabled) {
     const submitBtn = form?.querySelector('[type="submit"]');
     if (submitBtn) submitBtn.disabled = disabled;
   }
 
-  // --- Event Listeners ---
-  // Toggle buttons
+  // --- Toggle between Login and Signup views ---
+
   toSignupBtn?.addEventListener("click", (e) => {
     e.preventDefault();
     hideError();
@@ -61,16 +60,20 @@ function initAuthUI() {
     loginView?.querySelector("input")?.focus();
   });
 
-  // Login form submit
+  // --- Login form ---
+
   loginForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
     hideError();
+
     const email = document.querySelector("#loginEmail")?.value?.trim() ?? "";
     const password = document.querySelector("#loginPassword")?.value ?? "";
+
     if (!email || !password) {
       showError("Please enter your email and password.");
       return;
     }
+
     setSubmitDisabled(loginForm, true);
     try {
       await loginUser(email, password);
@@ -83,17 +86,21 @@ function initAuthUI() {
     }
   });
 
-  // Signup form submit
+  // --- Signup form ---
+
   signupForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
     hideError();
+
     const name = document.querySelector("#signupName")?.value?.trim() ?? "";
     const email = document.querySelector("#signupEmail")?.value?.trim() ?? "";
     const password = document.querySelector("#signupPassword")?.value ?? "";
+
     if (!name || !email || !password) {
       showError("Please fill in name, email, and password.");
       return;
     }
+
     setSubmitDisabled(signupForm, true);
     try {
       await signupUser(name, email, password);
@@ -107,5 +114,4 @@ function initAuthUI() {
   });
 }
 
-// --- Initialize UI on DOMContentLoaded ---
 document.addEventListener("DOMContentLoaded", initAuthUI);
