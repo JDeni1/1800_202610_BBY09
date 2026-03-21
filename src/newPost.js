@@ -109,3 +109,20 @@ document.addEventListener("DOMContentLoaded", () => {
   const postButton = document.getElementById("postButton");
   if (postButton) postButton.addEventListener("click", savePost);
 });
+
+async function submitReport(spotId, status, imageUrl, userId, details) {
+  // 1. Add to the subcollection
+  await addDoc(collection(db, "eventspots", spotId, "updates"), {
+    details: details,
+    status: status, // 1-5
+    image_url: imageUrl, // upload image to Storage first, store URL here
+    timestamp: serverTimestamp(),
+    owner: userId,
+  });
+
+  // 2. Update the parent eventspot's latest_status
+  await updateDoc(doc(db, "eventspots", spotId), {
+    latest_status: status,
+    last_updated: serverTimestamp(),
+  });
+}
