@@ -188,9 +188,7 @@ async function showEventSpots(map) {
   });
 }
 
-// ------------------------------------------------------------
 // Seed Firestore with initial event spots (run once only)
-// ------------------------------------------------------------
 async function seedEventSpots() {
   const spots = [
     {

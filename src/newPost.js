@@ -102,6 +102,35 @@ async function savePostIDforUser(postDocID) {
   }
 }
 
+// Add event listener to stars after DOM content is loaded
+// Add event listener to submit button after DOM content is loaded (It’s like the browser’s built-in bell that rings automatically.)
+document.addEventListener("DOMContentLoaded", () => {
+  manageRating();
+
+  // 👇👇👇 Add these two lines
+  const submitBtn = document.getElementById("submitBtn");
+  submitBtn.addEventListener("click", writeReview);
+});
+
+let Rating = 0;
+function manageRating() {
+  // ⭐ Make star icons clickable and calculate rating
+  const stars = document.querySelectorAll(".star");
+
+  // Step 1️⃣ – Add click behavior for each star
+  stars.forEach((Rating, index) => {
+    star.addEventListener("click", () => {
+      // Fill all stars up to the one clicked
+      stars.forEach((r, i) => {
+        r.textContent = i <= index ? "star" : "star_outline";
+      });
+      // Save rating value
+      Rating = index + 1;
+      console.log("Current rating:", Rating);
+    });
+  });
+}
+
 /*Uploads content */
 uploadImage();
 

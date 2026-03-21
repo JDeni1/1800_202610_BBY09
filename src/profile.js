@@ -148,10 +148,8 @@ import { auth } from "./firebaseConfig.js";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 
-// -------------------------------------------------------------
 // uploadImage()
 // Listens for file input changes and triggers Base64 encoding
-// -------------------------------------------------------------
 function uploadImage() {
   const inputImage = document.getElementById("inputImage");
   if (!inputImage) return;
@@ -171,10 +169,7 @@ function uploadImage() {
   });
 }
 
-// -------------------------------------------------------------
 // saveProfileImage(base64String)
-// Saves the Base64 image string to the user's Firestore document
-// -------------------------------------------------------------
 async function saveProfileImage(base64String) {
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
@@ -193,10 +188,7 @@ async function saveProfileImage(base64String) {
   });
 }
 
-// -------------------------------------------------------------
 // displayProfileImage(base64String)
-// Updates the <img> element with the provided Base64 image
-// -------------------------------------------------------------
 function displayProfileImage(base64String) {
   const imgElement = document.getElementById("profileImage");
   if (!imgElement) {
@@ -206,10 +198,7 @@ function displayProfileImage(base64String) {
   imgElement.src = `data:image/png;base64,${base64String}`;
 }
 
-// -------------------------------------------------------------
 // populateUserInfo()
-// Loads user data from Firestore and fills in the profile form
-// -------------------------------------------------------------
 function populateUserInfo() {
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
@@ -244,8 +233,5 @@ function populateUserInfo() {
   });
 }
 
-// -------------------------------------------------------------
-// Init
-// -------------------------------------------------------------
 uploadImage();
 populateUserInfo();
