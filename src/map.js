@@ -42,7 +42,7 @@ async function showHeat(map) {
         new maplibregl.Marker({ element: el })
             .setLngLat([item.location.lng, item.location.lat])
             .setPopup(
-                new maplibregl.Popup({ offset: 25 })
+                new maplibregl.Popup({ offset: 25 }) //this will make a popup to show the status of the heatmap.
                     .setHTML(`
                         <h3>${item.caption}</h3>
                         <p>${item.description}</p>
