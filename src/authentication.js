@@ -1,5 +1,6 @@
 import { auth } from "/src/firebaseConfig.js";
 import { db } from "/src/firebaseConfig.js";
+
 import { doc, setDoc } from "firebase/firestore";
 import {
   signInWithEmailAndPassword,
@@ -9,40 +10,28 @@ import {
   signOut,
 } from "firebase/auth";
 
-// src/authentication.js
-// Import specific functions from the Firebase Auth SDK
-
-// -------------------------------------------------------------
-// loginUser(email, password)
-// -------------------------------------------------------------
+/* loginUser(email, password) */
 export async function loginUser(email, password) {
   return signInWithEmailAndPassword(auth, email, password);
 }
 
-// -------------------------------------------------------------
-// signupUser(name, email, password)
-// -------------------------------------------------------------
+/* Creates a Firebase Auth user and a matching Firestore document*/
 export async function signupUser(name, email, password) {
   const userCredential = await createUserWithEmailAndPassword(
     auth,
     email,
     password,
   );
-  const user = userCredential.user; // Get the user object
+  const user = userCredential.user;
 
-  // Update the user's profile with the display name, NOTE: updateProfile is a built-in Firebase function
   await updateProfile(user, { displayName: name });
 
-  // After creating the user, we can also create a Firestore document for them with default values for country and school.
-  // This demonstrates how to link Auth users to Firestore data.
-  // Use 'try' 'catch' to handle any errors that might occur during Firestore document creation.
   try {
-    // Create a Firestore document for the new user with default values
     await setDoc(doc(db, "users", user.uid), {
-      name: name,
-      email: email,
-      country: "Canada", // Default value
-      school: "BCIT", // Default value
+      name,
+      email,
+      country: "Canada",
+      school: "BCIT",
     });
     console.log("Firestore user document created successfully!");
   } catch (error) {
@@ -50,48 +39,39 @@ export async function signupUser(name, email, password) {
       `Error creating user document:\n${error.code || ""}\n${error.message || error}`,
     );
   }
-  // Return the user object for further use (e.g., redirecting or showing a welcome message)
+
   return user;
 }
 
-// -------------------------------------------------------------
 // logoutUser()
-// -------------------------------------------------------------
 export async function logoutUser() {
   await signOut(auth);
-  window.location.href = "index.html";
+  window.location.href = "map.html";
 }
 
-// -------------------------------------------------------------
-// checkAuthState()
-// -------------------------------------------------------------
+/* Greets logged-in user by name, or shows "Guest" on map.html */
 export function checkAuthState() {
   onAuthStateChanged(auth, (user) => {
-    if (window.location.pathname.endsWith("main.html")) {
-      if (user) {
-        const displayName = user.displayName || user.email;
-        $("#welcomeMessage").text(`Hello, ${displayName}!`);
-      } else {
-        window.location.href = "index.html";
-      }
-    }
+    if (!window.location.pathname.endsWith("map.html")) return;
+
+    const message = user
+      ? `Hello, ${user.displayName || user.email}!`
+      : "Hello, Guest!";
+
+    $("#welcomeMessage").text(message);
   });
 }
 
-// -------------------------------------------------------------
-// onAuthReady(callback)
-// -------------------------------------------------------------
+/* onAuthReady(callback) */
 export function onAuthReady(callback) {
   return onAuthStateChanged(auth, callback);
 }
 
-// -------------------------------------------------------------
-// authErrorMessage(error)
-// -------------------------------------------------------------
+/* authErrorMessage(error) */
 export function authErrorMessage(error) {
   const code = (error?.code || "").toLowerCase();
 
-  const map = {
+  const errorMap = {
     "auth/invalid-credential": "Wrong email or password.",
     "auth/invalid-email": "Please enter a valid email address.",
     "auth/user-not-found": "No account found with that email.",
@@ -103,5 +83,5 @@ export function authErrorMessage(error) {
     "auth/network-request-failed": "Network error. Try again.",
   };
 
-  return map[code] || "Something went wrong. Please try again.";
+  return errorMap[code] || "Something went wrong. Please try again.";
 }

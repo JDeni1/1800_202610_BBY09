@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <title>My BCIT Project</title>
+    <title>BBY09-CrowdControl</title>
     <meta name="comp1800 template" content="My 1800 App" />
 
     <!-- Required meta tags -->
@@ -14,16 +14,21 @@
   </head>
 
   <body>
-    <!------------------------------>
-    <!-- Your HTML Layout go here -->
-    <!------------------------------>
-
     <!-- our own navbar goes here -->
     <site-navbar></site-navbar>
+
     <!-- Main content goes here -->
+
     <div class="container py-5" style="max-width: 420px">
       <!-- Alerts -->
       <div id="authAlert" class="alert alert-danger d-none" role="alert"></div>
+
+      <!-- Add this below the signup toggle link, inside the loginView -->
+      <div class="text-center mt-3">
+        <a href="map.html" class="btn btn-outline-secondary w-100"
+          >Continue as Guest</a
+        >
+      </div>
 
       <!-- Login -->
       <div id="loginView">
@@ -97,11 +102,11 @@
         </small>
       </div>
     </div>
+
     <!-- our own footer goes here -->
     <site-footer></site-footer>
-    <!---------------------------------------------->
-    <!-- Your own JavaScript scripts go here      -->
-    <!---------------------------------------------->
+
+    <!--SCRIPT-->
     <script type="module" src="/src/firebaseConfig.js"></script>
     <script type="module" src="/src/authentication.js"></script>
     <script type="module" src="/src/loginSignup.js"></script>
