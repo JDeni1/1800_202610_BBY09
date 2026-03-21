@@ -30,6 +30,7 @@ async function showHeat(map) {
         };
         const colour = item.latest_status ? statusColours[item.latest_status] : "#9e9e9e";
 
+        //this will make an element:
         const el = document.createElement("div");
         el.style.width = "20px";
         el.style.height = "20px";
