@@ -40,7 +40,7 @@ function showMap() {
   map.once("load", async () => {
     await addUserPin(map);
     await showEventSpots(map);
-    // await seedEventSpots(); // Uncomment to seed Firestore (run once only)
+    await seedEventSpots(); // Uncomment to seed Firestore (run once only)
     console.log("Map loaded!");
   });
 }
