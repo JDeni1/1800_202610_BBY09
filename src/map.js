@@ -3,34 +3,52 @@ import maplibregl from "maplibre-gl";
 // Database initialize here:
 import { db } from "./firebaseConfig.js";
 // Functions needed to read from database:
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, addDoc, setDoc, doc, updateDoc, serverTimestamp } from "firebase/firestore";
 
 // ------------------------------------------------------------
 // This function takes the heatmap data and adds green pins to the map.
 // It also stores the heatmap data in a global variable for later use (e.g., zooming).
 // ------------------------------------------------------------
 async function showHeat(map) {
-    // Fetch heat data from Firestore
-    const snapshot = await getHeat();
+    let snapshot = [];
+    try {
+        snapshot = await getHeat();
+    } catch (err) {
+        console.error("Firestore fetch failed:", err);
+    }
 
-    // Loop through each firestore document and add a green pin to the map
-    snapshot.forEach(doc => {
+    snapshot.forEach(item => {
+        appState.heat.push(item);
 
-        // Store heat data in global variable (array)
-        // for later use (e.g., zooming to all points)
-        appState.heat.push(doc);  
+        // Colour based on latest_status (1=green, 5=red, null=grey)
+        const statusColours = {
+            1: "#00c853",  // green - not busy
+            2: "#aeea00",  // yellow-green
+            3: "#ffd600",  // yellow
+            4: "#ff6d00",  // orange
+            5: "#d50000",  // red - very busy
+        };
+        const colour = item.latest_status ? statusColours[item.latest_status] : "#9e9e9e";
 
-        // create green pin
+        //this will make an element:
         const el = document.createElement("div");
-        el.style.width = "16px";
-        el.style.height = "16px";
+        el.style.width = "20px";
+        el.style.height = "20px";
         el.style.borderRadius = "50%";
-        el.style.backgroundColor = "green";
+        el.style.backgroundColor = colour;
         el.style.border = "2px solid white";
+        el.style.opacity = "0.85";
 
-        // new layer with markers, add to map
         new maplibregl.Marker({ element: el })
-            .setLngLat([doc.lng, doc.lat])
+            .setLngLat([item.location.lng, item.location.lat])
+            .setPopup(
+                new maplibregl.Popup({ offset: 25 })
+                    .setHTML(`
+                        <h3>${item.caption}</h3>
+                        <p>${item.description}</p>
+                        <p><strong>Status:</strong> ${item.latest_status ?? "No reports yet"} / 5</p>
+                    `)
+            )
             .addTo(map);
     });
 }
@@ -41,18 +59,8 @@ async function showHeat(map) {
 // It assumes each heatmap document has "lat" and "lng" fields.
 // ------------------------------------------------------------
 async function getHeat() {
-
-    // Fetch all documents from the "heatmap" collection in Firestore
-    const snapshot = await getDocs(collection(db, "heat"));
-
-    // Convert Firestore documents to plain JavaScript objects
-    // And returns a new array (list of the documents, json format)
-    // Equivalent to doing this:
-    //   const heatmap = [];
-    //   for (const doc of snapshot.docs) {
-    //       heatmap.push(doc.data());
-    
-    return snapshot.docs.map(doc => doc.data());
+    const snapshot = await getDocs(collection(db, "posts"));
+    return snapshot.docs.map(item => ({ id: item.id, ...item.data() }));
 }
 
 // ------------------------------------------------------------
@@ -86,6 +94,8 @@ function showMap() {
         // Choose either the built-in geolocate control or the manual pin method
         // addGeolocationControl(map);
         await addUserPin(map);
+        await showHeat(map);
+        //await seedPosts();  // Seed the database with initial posts (for testing/demo purposes, uncomment if needed)
 	      console.log("map loaded, placed user pin!");
     });
 
@@ -168,12 +178,43 @@ async function addUserPin(map) {
     );
 }
 
+async function seedPosts() {
+    const posts = [
+        {
+            caption: "BC Place",
+            description: "Stadium where the FIFA events will be held in 2026.",
+            location: { lat: 49.2766605, lng: -123.1113065 }
+        },
+        {
+            caption: "Commericial-Broadway Skytrain Station",
+            description: "The busiest SkyTrain Station in Vancouver.",
+            location: { lat: 49.2625, lng: -123.0689 }
+        },
+        {
+            caption: "PNE",
+            description: "Pacific National Exhibition grounds, with event space.",
+            location: { lat: 49.2837654, lng: -123.0394027 }
+        },
+        {
+            caption: "Stadium-Chinatown Skytrain Station",
+            description: "The main hub that leads to BC Place.",
+            location: { lat: 49.27962, lng: -123.1123564 }
+        },
+        {
+            caption: "Renfrew Skytrain Station",
+            description: "Transit Connection to the PNE.",
+            location: { lat: 49.2589135, lng: -123.0479603 }
+        }
+    ];
 
-/**
- * This adds a simple marker for the map.
- **/
-new maplibregl.Marker()
-  .setLngLat([-123.0016, 49.2532])
-  .addTo(map);
-
-
+    for (const post of posts) {
+        // Use setDoc + a named ID so you never get duplicates
+        await setDoc(doc(db, "posts", post.caption), {
+            ...post,
+            latest_status: null,   // no reports yet
+            last_updated: serverTimestamp()
+        });
+        console.log("Seeded:", post.caption);
+    }
+    console.log("Done seeding!");
+}
