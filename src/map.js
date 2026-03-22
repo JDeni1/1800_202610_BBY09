@@ -14,6 +14,7 @@ import {
   orderBy,
   limit,
   serverTimestamp,
+  onSnapshot,
 } from "firebase/firestore";
 
 // ------------------------------------------------------------
@@ -23,6 +24,16 @@ const appState = {
   spots: [],
   userLngLat: null,
 };
+
+const markerMap = {}
+
+const statusColours = {
+    1: "#00c853", // green  - not busy
+    2: "#aeea00", // yellow-green
+    3: "#ffd600", // yellow
+    4: "#ff6d00", // orange
+    5: "#d50000", // red    - very busy
+  };
 
 // ------------------------------------------------------------
 // Map initialization
@@ -40,8 +51,9 @@ function showMap() {
   map.once("load", async () => {
     await addUserPin(map);
     await showEventSpots(map);
-    await seedEventSpots(); // Uncomment to seed Firestore (run once only)
+    //await seedEventSpots(); // Uncomment to seed Firestore (run once only)
     console.log("Map loaded!");
+    listenToEventSpots(map);
   });
 }
 
@@ -134,14 +146,6 @@ async function showEventSpots(map) {
     return;
   }
 
-  const statusColours = {
-    1: "#00c853", // green  - not busy
-    2: "#aeea00", // yellow-green
-    3: "#ffd600", // yellow
-    4: "#ff6d00", // orange
-    5: "#d50000", // red    - very busy
-  };
-
   spots.forEach((spot) => {
     appState.spots.push(spot);
 
@@ -158,36 +162,64 @@ async function showEventSpots(map) {
     el.style.opacity = "0.85";
     el.style.cursor = "pointer";
 
-    const marker = new maplibregl.Marker({ element: el }).setLngLat([
-      spot.location.lng,
-      spot.location.lat,
-    ]);
+    const marker = new maplibregl.Marker({ element: el })
+    .setLngLat([spot.location.lng, spot.location.lat])
+    .addTo(map);
 
+    markerMap[spot.id]= marker;
+    
     // On click: fetch latest update and show in popup
     el.addEventListener("click", async () => {
-      const latest = await getLatestUpdate(spot.id);
+  const latest = await getLatestUpdate(spot.id);
+  
 
-      const popupHTML = latest
-        ? `<h3>${spot.name}</h3>
-           <p>${spot.description}</p>
-           <p><strong>Status:</strong> ${latest.status} / 5</p>
-           <p>${latest.details}</p>
-           <p><em>${latest.timestamp?.toDate().toLocaleString() ?? ""}</em></p>
-           ${latest.image_url ? `<img src="${latest.image_url}" style="width:100%;border-radius:6px;margin-top:6px;">` : ""}`
-        : `<h3>${spot.name}</h3>
-           <p>${spot.description}</p>
-           <p>No reports yet.</p>`;
+  const popupHTML = latest
+    ? `<h3>${spot.name}</h3>
+       <p>${spot.description}</p>
+       <p><strong>Status:</strong> ${latest.status} / 5</p>
+       <p>${latest.details}</p>
+       <p><em>${latest.timestamp?.toDate().toLocaleString() ?? ""}</em></p>
+       ${latest.image_url ? `<img src="${latest.image_url}" style="width:100%;border-radius:6px;margin-top:6px;">` : ""}`
+    : `<h3>${spot.name}</h3>
+       <p>${spot.description}</p>
+       <p>No reports yet.</p>`;
 
-      new maplibregl.Popup({ offset: 25 })
-        .setLngLat([spot.location.lng, spot.location.lat])
-        .setHTML(popupHTML)
-        .addTo(map);
+  const reportForm = `
+    <hr/>
+    <h4>Submit a Report</h4>
+    <label>Crowd Level (1-5):</label>
+    <input id="report-status" type="number" min="1" max="5" style="width:100%;margin-bottom:6px;">
+    <label>Details:</label>
+    <textarea id="report-details" style="width:100%;margin-bottom:6px;"></textarea>
+    <button id="report-submit" style="width:100%;padding:6px;cursor:pointer;">Submit</button>
+  `;
+
+  const popup = new maplibregl.Popup({ offset: 25 })
+    .setLngLat([spot.location.lng, spot.location.lat])
+    .setHTML(popupHTML + reportForm)
+    .addTo(map);
+
+  // Wire up the submit button after popup is in the DOM
+  setTimeout(() => {
+    const btn = document.getElementById("report-submit");
+    //console.log("button found?", btn); //This will tell you if the button is found in console, you can remove it if its affecting you.
+    btn?.addEventListener("click", async () => {
+      //console.log("button clicked!"); //Ad nauseum, you can remove this too if it's affecting you.
+      const status = parseInt(document.getElementById("report-status").value);
+      const details = document.getElementById("report-details").value;
+
+      if (!status || status < 1 || status > 5) {
+        alert("Please enter a crowd level between 1 and 5.");
+        return;
+      }
+
+      await submitReport(spot.id, status, details);
+      popup.remove();
     });
-
-    marker.addTo(map);
-  });
+  }, 100);
+});
+});
 }
-
 // ------------------------------------------------------------
 // Seed Firestore with initial event spots (run once only)
 // ------------------------------------------------------------
@@ -237,3 +269,38 @@ async function seedEventSpots() {
   }
   console.log("Done seeding!");
 }
+
+/**------------------------------------------------------------
+ * This function will listen to the HTML popup above and will update 
+ * the Firestore database with the new report and latest_status for the event spot.
+ ----------------------------------------------------------------*/
+
+async function submitReport(spotId, status, details) {
+  console.log("submitReport called", spotId, status, details);
+    await addDoc(collection(db, "eventspots", spotId, "updates"), {
+    status: status,
+    details: details,
+    timestamp: serverTimestamp(),
+  });
+
+  await updateDoc(doc(db, "eventspots", spotId), {
+    latest_status: status,
+    last_updated: serverTimestamp(),
+  });
+}
+
+//This function will listen to the event spots and update the eventspots category in firestore:
+function listenToEventSpots(map) {
+  onSnapshot(collection(db, "eventspots"), (snapshot) => {
+    snapshot.docChanges().forEach((change) => {
+      const spot = { id: change.doc.id, ...change.doc.data() };
+      if (change.type === "modified") {
+        const marker = markerMap[spot.id];
+        if (!marker) return;
+        marker.getElement().style.backgroundColor =
+          spot.latest_status ? statusColours[spot.latest_status] : "#9e9e9e";
+      }
+    });
+  });
+}
+
