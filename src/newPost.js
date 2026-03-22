@@ -1,157 +1,212 @@
-import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap";
-import "/styles/style.css";
-
-import { db, auth } from "./firebaseConfig.js";
+import { db } from "./firebaseConfig.js";
+import { getAuth } from "firebase/auth";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import {
   collection,
   addDoc,
-  serverTimestamp,
   doc,
   updateDoc,
-  arrayUnion,
+  getDocs,
+  serverTimestamp,
 } from "firebase/firestore";
 
-/*Uploads images - though only stores within local storage */
-function uploadImage() {
-  const inputImage = document.getElementById("inputImage");
-  if (!inputImage) return;
+const auth = getAuth();
+const storage = getStorage();
+let selectedRating = 0;
+let closestSpotId = null;
 
-  inputImage.addEventListener("change", (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
+// On DOM ready
+document.addEventListener("DOMContentLoaded", async () => {
+  await populateSpotDropdown();
+  setupRatingListener();
 
-    const reader = new FileReader();
-
-    reader.onload = (e) => {
-      const base64String = e.target.result.split(",")[1];
-      document.getElementById("mypic-goes-here").src = e.target.result;
-      localStorage.setItem("inputImage", base64String);
-      console.log("Image saved to localStorage as Base64 string.");
-    };
-
-    reader.readAsDataURL(file);
-  });
-}
-
-/*Saves posts in fire store */
-async function savePost() {
-  alert("SAVE POST is triggered");
-
-  const user = auth.currentUser;
-  if (!user) {
-    console.log("Error, no user signed in");
-    return;
-  }
-
-  const desc = document.getElementById("description").value;
-  const title = document.getElementById("post-title").value;
-  const inputImage = localStorage.getItem("inputImage") || "";
-
-  const position = await getCurrentPositionSafe();
-  const latitude = position?.coords?.latitude || null;
-  const longitude = position?.coords?.longitude || null;
-
-  try {
-    const docRef = await addDoc(collection(db, "posts"), {
-      owner: user.uid,
-      caption: title,
-      description: desc,
-      image: inputImage,
-      last_updated: serverTimestamp(),
-      location: { lat: latitude, lng: longitude },
-    });
-
-    console.log("Post document added:", docRef.id);
-    savePostIDforUser(docRef.id);
-  } catch (error) {
-    console.error("Error adding post:", error);
-  }
-}
-
-/* Returns a Promise resolving to geolocation position or null */
-function getCurrentPositionSafe() {
-  return new Promise((resolve) => {
-    if (!navigator.geolocation) return resolve(null);
-
-    navigator.geolocation.getCurrentPosition(
-      (pos) => resolve(pos),
-      () => resolve(null),
-      { enableHighAccuracy: true },
-    );
-  });
-}
-
-/* Adds new post ID within Firebase */
-async function savePostIDforUser(postDocID) {
-  const user = auth.currentUser;
-  if (!user) {
-    console.error("No user signed in.");
-    return;
-  }
-
-  try {
-    await updateDoc(doc(db, "users", user.uid), {
-      myposts: arrayUnion(postDocID),
-    });
-
-    console.log("Saved to user's document!");
-    alert("Post is complete!");
-  } catch (error) {
-    console.error("Error writing document:", error);
-  }
-}
-
-// Add event listener to stars after DOM content is loaded
-// Add event listener to submit button after DOM content is loaded (It’s like the browser’s built-in bell that rings automatically.)
-document.addEventListener("DOMContentLoaded", () => {
-  manageRating();
-
-  // 👇👇👇 Add these two lines
   const submitBtn = document.getElementById("submitBtn");
-  submitBtn.addEventListener("click", writeReview);
+  if (!submitBtn) {
+    console.error(
+      "submitBtn not found — check newPost.html has id='submitBtn'",
+    );
+    return;
+  }
+  submitBtn.addEventListener("click", handleSubmit);
 });
 
-let Rating = 0;
-function manageRating() {
-  // ⭐ Make star icons clickable and calculate rating
-  const stars = document.querySelectorAll(".star");
+// Populate the spot dropdown from Firestore.
+async function populateSpotDropdown() {
+  let snapshot;
+  try {
+    snapshot = await getDocs(collection(db, "eventspots"));
+  } catch (err) {
+    console.error("Could not load event spots:", err);
+    return;
+  }
 
-  // Step 1️⃣ – Add click behavior for each star
-  stars.forEach((Rating, index) => {
-    star.addEventListener("click", () => {
-      // Fill all stars up to the one clicked
-      stars.forEach((r, i) => {
-        r.textContent = i <= index ? "star" : "star_outline";
-      });
-      // Save rating value
-      Rating = index + 1;
-      console.log("Current rating:", Rating);
+  const select = document.getElementById("spotSelect");
+
+  snapshot.docs.forEach((d) => {
+    const option = document.createElement("option");
+    option.value = d.id;
+    option.textContent = d.data().name;
+    select.appendChild(option);
+  });
+
+  // Pre-select closest spot using geolocation
+  if ("geolocation" in navigator) {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude: userLat, longitude: userLng } = pos.coords;
+        let closestId = null;
+        let minDist = Infinity;
+
+        snapshot.docs.forEach((d) => {
+          const { location } = d.data();
+          const dist = getDistance(
+            userLat,
+            userLng,
+            location.lat,
+            location.lng,
+          );
+          if (dist < minDist) {
+            minDist = dist;
+            closestId = d.id;
+          }
+        });
+
+        if (closestId) {
+          closestSpotId = closestId;
+          select.value = closestId;
+        }
+      },
+      (err) => console.warn("Geolocation unavailable for pre-selection:", err),
+    );
+  }
+}
+
+// ------------------------------------------------------------
+// Euclidean distance — good enough for nearby Vancouver spots
+// ------------------------------------------------------------
+function getDistance(lat1, lng1, lat2, lng2) {
+  return Math.sqrt(Math.pow(lat2 - lat1, 2) + Math.pow(lng2 - lng1, 2));
+}
+
+//Radio buttons
+function setupRatingListener() {
+  document.querySelectorAll('input[name="crowdStatus"]').forEach((radio) => {
+    radio.addEventListener("change", () => {
+      selectedRating = parseInt(radio.value);
+      updateRatingUI(selectedRating);
     });
   });
 }
 
-/*Uploads content */
-uploadImage();
-
-document.addEventListener("DOMContentLoaded", () => {
-  const postButton = document.getElementById("postButton");
-  if (postButton) postButton.addEventListener("click", savePost);
-});
-
-async function submitReport(spotId, status, imageUrl, userId, details) {
-  // 1. Add to the subcollection
-  await addDoc(collection(db, "eventspots", spotId, "updates"), {
-    details: details,
-    status: status, // 1-5
-    image_url: imageUrl, // upload image to Storage first, store URL here
-    timestamp: serverTimestamp(),
-    owner: userId,
+function updateRatingUI(rating) {
+  document.querySelectorAll(".rating-label").forEach((label, i) => {
+    label.classList.toggle("active", i + 1 === rating);
   });
+}
 
-  // 2. Update the parent eventspot's latest_status
-  await updateDoc(doc(db, "eventspots", spotId), {
-    latest_status: status,
-    last_updated: serverTimestamp(),
+//Images
+async function uploadImage(file, spotId) {
+  const storageRef = ref(
+    storage,
+    `updates/${spotId}/${Date.now()}_${file.name}`,
+  );
+  await uploadBytes(storageRef, file);
+  return await getDownloadURL(storageRef);
+}
+
+async function handleSubmit() {
+  hideFeedback();
+
+  const spotId = document.getElementById("spotSelect").value;
+  const caption = document.getElementById("post-title").value.trim();
+  const details = document.getElementById("detailsInput").value.trim();
+  const imageFile = document.getElementById("imageInput").files[0];
+  const user = auth.currentUser;
+
+  // Validation
+  if (!spotId) {
+    showError("Please select a location.");
+    return;
+  }
+  if (selectedRating === 0) {
+    showError("Please select a crowd status (1–5).");
+    return;
+  }
+  if (!user) {
+    showError("You must be logged in to submit a report.");
+    return;
+  }
+
+  const submitBtn = document.getElementById("submitBtn");
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Submitting…";
+
+  try {
+    // Upload image if provided
+    let imageUrl = null;
+    if (imageFile) {
+      imageUrl = await uploadImage(imageFile, spotId);
+    }
+
+    // Write new update to subcollection
+    await addDoc(collection(db, "eventspots", spotId, "updates"), {
+      caption: caption,
+      details: details || "",
+      status: selectedRating,
+      image_url: imageUrl,
+      timestamp: serverTimestamp(),
+      owner: user.uid,
+    });
+
+    // 3Update latest_status on the parent eventspot
+    await updateDoc(doc(db, "eventspots", spotId), {
+      latest_status: selectedRating,
+      last_updated: serverTimestamp(),
+    });
+
+    showSuccess("Report submitted! Thanks for helping the community.");
+    resetForm();
+  } catch (err) {
+    console.error("Submit failed:", err);
+    showError("Something went wrong. Please try again.");
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Submit Report";
+  }
+}
+
+// Reset form after successful submit
+function resetForm() {
+  document.getElementById("spotSelect").value = closestSpotId ?? "";
+  document.getElementById("detailsInput").value = "";
+  document.getElementById("imageInput").value = "";
+  document.querySelectorAll('input[name="crowdStatus"]').forEach((r) => {
+    r.checked = false;
   });
+  document.querySelectorAll(".rating-label").forEach((l) => {
+    l.classList.remove("active");
+  });
+  selectedRating = 0;
+}
+
+// ------------------------------------------------------------
+// Feedback helpers
+// ------------------------------------------------------------
+function showError(msg) {
+  const el = document.getElementById("formFeedback");
+  el.className = "alert alert-danger mt-3";
+  el.textContent = msg;
+  el.style.display = "block";
+}
+
+function showSuccess(msg) {
+  const el = document.getElementById("formFeedback");
+  el.className = "alert alert-success mt-3";
+  el.textContent = msg;
+  el.style.display = "block";
+}
+
+function hideFeedback() {
+  const el = document.getElementById("formFeedback");
+  el.style.display = "none";
 }

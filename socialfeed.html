@@ -17,33 +17,19 @@
     <!-- our own navbar goes here -->
     <site-navbar></site-navbar>
 
-    <!-- Main content goes here -->
-    <main class="container py-4">
-      <h1 id="SocialName">Social Feed</h1>
-      <div
-        id="allPosts-goes-here"
-        class="row row-cols-1 row-cols-md-3 g-4"
-      ></div>
-    </main>
+    <div class="container py-4" style="max-width: 680px">
+      <h1 class="mb-1">Social Feed</h1>
+      <p class="text-muted mb-4">Latest crowd reports from around Vancouver.</p>
 
-    <template id="postCardTemplate">
-      <div class="col">
-        <div class="card h-100">
-          <img class="card-img-top card-image" src="..." alt="post-image" />
-          <div class="card-body">
-            <h5 class="card-title"></h5>
-            <p class="card-text"></p>
-            <p>Location: <span class="card-location">0, 0</span></p>
-            <a class="btn btn-primary read-more" href="#">Read More</a>
-          </div>
-        </div>
-      </div>
-    </template>
+      <!-- All report cards are injected here by socialFeed.js -->
+      <div id="socialFeed"></div>
+    </div>
 
     <!-- our own footer goes here -->
     <site-footer></site-footer>
 
     <!--Script-->
     <script type="module" src="/src/app.js"></script>
+    <script type="module" src="src/socialFeed.js"></script>
   </body>
 </html>

@@ -30,8 +30,8 @@ export async function signupUser(name, email, password) {
     await setDoc(doc(db, "users", user.uid), {
       name,
       email,
-      country: "Canada",
-      school: "BCIT",
+      country: "",
+      school: "",
     });
     console.log("Firestore user document created successfully!");
   } catch (error) {
@@ -50,17 +50,17 @@ export async function logoutUser() {
 }
 
 /* Greets logged-in user by name, or shows "Guest" on map.html */
-export function checkAuthState() {
-  onAuthStateChanged(auth, (user) => {
-    if (!window.location.pathname.endsWith("map.html")) return;
+// export function checkAuthState() {
+//   onAuthStateChanged(auth, (user) => {
+//     if (!window.location.pathname.endsWith("map.html")) return;
 
-    const message = user
-      ? `Hello, ${user.displayName || user.email}!`
-      : "Hello, Guest!";
+//     const message = user
+//       ? `Hello, ${user.displayName || user.email}!`
+//       : "Hello, Guest!";
 
-    $("#welcomeMessage").text(message);
-  });
-}
+//     $("#welcomeMessage").text(message);
+//   });
+// }
 
 /* onAuthReady(callback) */
 export function onAuthReady(callback) {

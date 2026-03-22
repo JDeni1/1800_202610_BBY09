@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <title>My BCIT Project</title>
+    <title>NewPost</title>
     <meta name="comp1800 template" content="My 1800 App" />
 
     <!-- Required meta tags -->
@@ -24,7 +24,7 @@
         <div class="form-group">
           <div class="mb-3">
             <label for="exampleFormControlInput1" class="form-label"
-              >Title of post</label
+              >Caption of post</label
             >
             <input
               type="text"
@@ -39,26 +39,62 @@
             >
             <textarea
               class="form-control"
-              id="description"
+              id="detailsInput"
               rows="3"
               placeholder="Discribe your post"
             ></textarea>
           </div>
         </div>
         <div class="container py-3">
-          <input type="file" id="inputImage" accept="image/*" />
+          <input type="file" id="imageInput" accept="image/*" />
           <img id="mypic-goes-here" width="100" height="100" />
         </div>
 
-        <div class="card-body">
-          <p>Rate your overall experience:</p>
-        </div>
+              <div class="mb-4">
+        <label for="spotSelect" class="form-label fw-semibold">Location</label>
+        <select class="form-select" id="spotSelect">
+          <option value="" disabled selected>Select an event spot…</option>
+          <!-- Populated by newPost.js -->
+        </select>
+        <div class="form-text">We'll pre-select the closest spot to you.</div>
+      </div>
+
+            <!--Crowds-->
+              <div class="mb-4">
+        <label class="form-label fw-semibold">Crowd Status</label>
+        <div class="d-flex gap-3 flex-wrap mt-1">
+ 
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="crowdStatus" id="status1" value="1" />
+            <label class="form-check-label rating-label" for="status1">1 : Not Crowded</label>
+          </div>
+ 
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="crowdStatus" id="status2" value="2" />
+            <label class="form-check-label rating-label" for="status2">2</label>
+          </div>
+ 
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="crowdStatus" id="status3" value="3" />
+            <label class="form-check-label rating-label" for="status3">3</label>
+          </div>
+ 
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="crowdStatus" id="status4" value="4" />
+            <label class="form-check-label rating-label" for="status4">4</label>
+          </div>
+ 
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="crowdStatus" id="status5" value="5" />
+            <label class="form-check-label rating-label" for="status5">5 : Very Crowded</label>
+          </div>
 
         <div class="d-flex mt-5">
-          <button id="postButton" type="button" class="btn btn-info">
+          <button id="submitBtn" type="button" class="btn btn-primary w-100">
             Post Now
           </button>
         </div>
+         <div id="formFeedback" style="display:none;"></div>
       </form>
     </div>
 
