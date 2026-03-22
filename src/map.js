@@ -206,7 +206,7 @@ async function showEventSpots(map) {
     btn?.addEventListener("click", async () => {
       //console.log("button clicked!"); //Ad nauseum, you can remove this too if it's affecting you.
       const status = parseInt(document.getElementById("report-status").value);
-      const details = document.getElementById("report-details").value;
+      const details = document.getElementById("report-details").value; //this will tell you in the console that you updated the spot or "marker".
 
       if (!status || status < 1 || status > 5) {
         alert("Please enter a crowd level between 1 and 5.");
@@ -297,7 +297,7 @@ function listenToEventSpots(map) {
       if (change.type === "modified") {
         const marker = markerMap[spot.id];
         if (!marker) return;
-        marker.getElement().style.backgroundColor =
+        marker.getElement().style.backgroundColor = //This will change the colour to match the 
           spot.latest_status ? statusColours[spot.latest_status] : "#9e9e9e";
       }
     });
