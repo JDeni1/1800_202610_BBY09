@@ -185,13 +185,6 @@ async function showEventSpots(map) {
        <p>No reports yet.</p>`;
 
   const reportForm = `
-    <hr/>
-    <h4>Submit a Report</h4>
-    <label>Crowd Level (1-5):</label>
-    <input id="report-status" type="number" min="1" max="5" style="width:100%;margin-bottom:6px;">
-    <label>Details:</label>
-    <textarea id="report-details" style="width:100%;margin-bottom:6px;"></textarea>
-    <button id="report-submit" style="width:100%;padding:6px;cursor:pointer;">Submit</button>
   `;
 
   const popup = new maplibregl.Popup({ offset: 25 })
