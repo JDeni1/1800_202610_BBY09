@@ -331,3 +331,4 @@ legend.innerHTML = `
 
 // Replace 'map' with whatever your map container div's ID is
 document.getElementById('map').appendChild(legend);
+
