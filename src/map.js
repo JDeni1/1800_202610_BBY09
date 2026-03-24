@@ -297,3 +297,37 @@ function listenToEventSpots(map) {
   });
 }
 
+// This adds a colour status bar to the bottom right of the map to let people know how busy the area is.
+const existingLegend = document.getElementById('map-legend');
+if (existingLegend) existingLegend.remove();
+
+const legend = document.createElement('div');
+legend.id = 'map-legend';
+legend.style.cssText = `
+  position: absolute;
+  bottom: 40px;
+  right: 10px;
+  background: white;
+  padding: 10px 14px;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+  font-family: sans-serif;
+  font-size: 12px;
+  z-index: 9999;
+`;
+
+legend.innerHTML = `
+  <div style="font-weight:bold;margin-bottom:6px;">Busyness</div>
+  <div style="
+    width: 150px; height: 16px;
+    border-radius: 4px;
+    background: linear-gradient(to right, #00c853, #aeea00, #ffd600, #ff6d00, #d50000);
+  "></div>
+  <div style="display:flex;justify-content:space-between;margin-top:4px;">
+    <span>Not busy</span>
+    <span>Very busy</span>
+  </div>
+`;
+
+// Replace 'map' with whatever your map container div's ID is
+document.getElementById('map').appendChild(legend);
