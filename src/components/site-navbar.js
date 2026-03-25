@@ -25,9 +25,6 @@ class SiteNavbar extends HTMLElement {
                     <div class="collapse navbar-collapse" id="navbarSupportedContent">
                         <ul class="navbar-nav me-auto">
                             <li class="nav-item">
-                                <a class="nav-link" href="index.html">Home</a>
-                            </li>
-                            <li class="nav-item">
                                 <a class="nav-link" href="map.html">Heatmap</a>
                             </li>
                             <li class="nav-item">
@@ -41,10 +38,6 @@ class SiteNavbar extends HTMLElement {
                             </li>
                         </ul>
                         <div class="d-flex align-items-center gap-2 ms-lg-2" id="rightControls">
-                            <form class="d-flex align-items-center gap-2 my-2 my-lg-0" id="navSearch" role="search">
-                                <input class="form-control d-none d-sm-block w-auto" type="search" placeholder="Search" aria-label="Search">
-                                <button class="btn btn-outline-light d-none d-sm-inline-block" type="submit">Search</button>
-                            </form>
                             <div id="authControls" class="auth-controls d-flex align-items-center gap-2 my-2 my-lg-0">
                                 <!-- populated by JS -->
                             </div>
