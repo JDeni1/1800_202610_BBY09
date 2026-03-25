@@ -46,7 +46,7 @@ export async function signupUser(name, email, password) {
 // logoutUser()
 export async function logoutUser() {
   await signOut(auth);
-  window.location.href = "map.html";
+  window.location.href = "index.html";
 }
 
 /* onAuthReady(callback) */
