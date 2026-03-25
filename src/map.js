@@ -25,15 +25,15 @@ const appState = {
   userLngLat: null,
 };
 
-const markerMap = {};
+const markerMap = {}
 
 const statusColours = {
-  1: "#00c853", // green  - not busy
-  2: "#aeea00", // yellow-green
-  3: "#ffd600", // yellow
-  4: "#ff6d00", // orange
-  5: "#d50000", // red    - very busy
-};
+    1: "#00c853", // green  - not busy
+    2: "#aeea00", // yellow-green
+    3: "#ffd600", // yellow
+    4: "#ff6d00", // orange
+    5: "#d50000", // red    - very busy
+  };
 
 // ------------------------------------------------------------
 // Map initialization
@@ -163,65 +163,59 @@ async function showEventSpots(map) {
     el.style.cursor = "pointer";
 
     const marker = new maplibregl.Marker({ element: el })
-      .setLngLat([spot.location.lng, spot.location.lat])
-      .addTo(map);
+    .setLngLat([spot.location.lng, spot.location.lat])
+    .addTo(map);
 
-    markerMap[spot.id] = marker;
-
+    markerMap[spot.id]= marker;
+    
     // On click: fetch latest update and show in popup
     el.addEventListener("click", async () => {
-      const latest = await getLatestUpdate(spot.id);
+  const latest = await getLatestUpdate(spot.id);
+  
 
-      const popupHTML = latest
-        ? `<h3>${spot.name}</h3>
+  const popupHTML = latest
+    ? `<h3>${spot.name}</h3>
        <p>${spot.description}</p>
        <p><strong>Status:</strong> ${latest.status} / 5</p>
        <p>${latest.details}</p>
        <p><em>${latest.timestamp?.toDate().toLocaleString() ?? ""}</em></p>
        ${latest.image_url ? `<img src="${latest.image_url}" style="width:100%;border-radius:6px;margin-top:6px;">` : ""}`
-        : `<h3>${spot.name}</h3>
+    : `<h3>${spot.name}</h3>
        <p>${spot.description}</p>
        <p>No reports yet.</p>`;
 
-      const reportForm = `
-    <hr/>
-    <h4>Submit a Report</h4>
-    <label>Crowd Level (1-5):</label>
-    <input id="report-status" type="number" min="1" max="5" style="width:100%;margin-bottom:6px;">
-    <label>Details:</label>
-    <textarea id="report-details" style="width:100%;margin-bottom:6px;"></textarea>
-    <button id="report-submit" style="width:100%;padding:6px;cursor:pointer;">Submit</button>
+  const reportForm = `
   `;
 
-      const popup = new maplibregl.Popup({ offset: 25 })
-        .setLngLat([spot.location.lng, spot.location.lat])
-        .setHTML(popupHTML + reportForm)
-        .addTo(map);
+  const popup = new maplibregl.Popup({ offset: 25 })
+    .setLngLat([spot.location.lng, spot.location.lat])
+    .setHTML(popupHTML + reportForm)
+    .addTo(map);
 
-      // Wire up the submit button after popup is in the DOM
-      setTimeout(() => {
-        const btn = document.getElementById("report-submit");
-        //console.log("button found?", btn); //This will tell you if the button is found in console, you can remove it if its affecting you.
-        btn?.addEventListener("click", async () => {
-          //console.log("button clicked!"); //Ad nauseum, you can remove this too if it's affecting you.
-          const status = parseInt(
-            document.getElementById("report-status").value,
-          );
-          const details = document.getElementById("report-details").value; //this will tell you in the console that you updated the spot or "marker".
+  // Wire up the submit button after popup is in the DOM
+  setTimeout(() => {
+    const btn = document.getElementById("report-submit");
+    //console.log("button found?", btn); //This will tell you if the button is found in console, you can remove it if its affecting you.
+    btn?.addEventListener("click", async () => {
+      //console.log("button clicked!"); //Ad nauseum, you can remove this too if it's affecting you.
+      const status = parseInt(document.getElementById("report-status").value);
+      const details = document.getElementById("report-details").value; //this will tell you in the console that you updated the spot or "marker".
 
-          if (!status || status < 1 || status > 5) {
-            alert("Please enter a crowd level between 1 and 5.");
-            return;
-          }
+      if (!status || status < 1 || status > 5) {
+        alert("Please enter a crowd level between 1 and 5.");
+        return;
+      }
 
-          await submitReport(spot.id, status, details);
-          popup.remove();
-        });
-      }, 100);
+      await submitReport(spot.id, status, details);
+      popup.remove();
     });
-  });
+  }, 100);
+});
+});
 }
+// ------------------------------------------------------------
 // Seed Firestore with initial event spots (run once only)
+// ------------------------------------------------------------
 async function seedEventSpots() {
   const spots = [
     {
@@ -276,7 +270,7 @@ async function seedEventSpots() {
 
 async function submitReport(spotId, status, details) {
   console.log("submitReport called", spotId, status, details);
-  await addDoc(collection(db, "eventspots", spotId, "updates"), {
+    await addDoc(collection(db, "eventspots", spotId, "updates"), {
     status: status,
     details: details,
     timestamp: serverTimestamp(),
@@ -296,9 +290,45 @@ function listenToEventSpots(map) {
       if (change.type === "modified") {
         const marker = markerMap[spot.id];
         if (!marker) return;
-        marker.getElement().style.backgroundColor = //This will change the colour to match the
+        marker.getElement().style.backgroundColor = //This will change the colour to match the spot
           spot.latest_status ? statusColours[spot.latest_status] : "#9e9e9e";
       }
     });
   });
 }
+
+// This adds a colour status bar to the bottom right of the map to let people know how busy the area is.
+const existingLegend = document.getElementById('map-legend');
+if (existingLegend) existingLegend.remove();
+
+const legend = document.createElement('div');
+legend.id = 'map-legend';
+legend.style.cssText = `
+  position: absolute;
+  bottom: 40px;
+  right: 10px;
+  background: white;
+  padding: 10px 14px;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+  font-family: sans-serif;
+  font-size: 12px;
+  z-index: 9999;
+`;
+
+legend.innerHTML = `
+  <div style="font-weight:bold;margin-bottom:6px;">Busyness</div>
+  <div style="
+    width: 150px; height: 16px;
+    border-radius: 4px;
+    background: linear-gradient(to right, #00c853, #aeea00, #ffd600, #ff6d00, #d50000);
+  "></div>
+  <div style="display:flex;justify-content:space-between;margin-top:4px;">
+    <span>Not busy</span>
+    <span>Very busy</span>
+  </div>
+`;
+
+// Replace 'map' with whatever your map container div's ID is
+document.getElementById('map').appendChild(legend);
+
