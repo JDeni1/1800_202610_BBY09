@@ -71,16 +71,6 @@ async function displayCardsDynamically() {
 showName();
 displayCardsDynamically();
 
-//--------------------------------------------------------------
-// Example function to read a CSV file and import data into Firestore.
-// This is just a demonstration of how you might seed your Firestore database
-// with data from a CSV file. You can adapt this to your specific needs.
-//
-// It uses fetch() to read the CSV file from the public directory
-// run with live-server or similar setup that can serve files from the public folder.
-// This function is called ONLY one time from the browser console to seed the database,
-// then you can comment it out or remove it.
-//--------------------------------------------------------------
 async function getCSVdata() {
   // Fetch the CSV file from the public directory
   const response = await fetch("./monitor_points.csv");
