@@ -1,1 +1,4 @@
-
+body {
+  margin-left: 60px; /* matches collapsed sidebar width */
+  transition: margin-left 0.25s ease;
+}

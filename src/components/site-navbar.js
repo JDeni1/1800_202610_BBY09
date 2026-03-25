@@ -11,66 +11,127 @@ class SiteNavbar extends HTMLElement {
 
   renderNavbar() {
     this.innerHTML = `
-            <!-- Navbar: single source of truth -->
-            <nav class="navbar navbar-expand-lg navbar-light bg-primary">
-                <div class="container-fluid">
-                    <a class="navbar-brand" href="/">
-                        <img src="/images/ApplogowithoutName.png" height="36">
-                        CrowdControl
-                    </a>
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-                        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                        <ul class="navbar-nav me-auto">
-                            <li class="nav-item">
-                                <a class="nav-link" href="index.html">Home</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="map.html">Heatmap</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="newPost.html">newPost</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="socialfeed.html">Social</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="profile.html">Profile</a>
-                            </li>
-                        </ul>
-                        <div class="d-flex align-items-center gap-2 ms-lg-2" id="rightControls">
-                            <form class="d-flex align-items-center gap-2 my-2 my-lg-0" id="navSearch" role="search">
-                                <input class="form-control d-none d-sm-block w-auto" type="search" placeholder="Search" aria-label="Search">
-                                <button class="btn btn-outline-light d-none d-sm-inline-block" type="submit">Search</button>
-                            </form>
-                            <div id="authControls" class="auth-controls d-flex align-items-center gap-2 my-2 my-lg-0">
-                                <!-- populated by JS -->
-                            </div>
-                        </div>
+      <style>
+        .sidebar {
+          position: fixed;
+          top: 0; left: 0;
+          height: 100vh;
+          width: 60px;
+          background: #0d6efd;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 12px 0;
+          transition: width 0.25s ease;
+          overflow: hidden;
+          z-index: 1000;
+        }
+        .sidebar.open {
+          width: 220px;
+          align-items: flex-start;
+          padding: 12px;
+        }
+        .sidebar-toggle {
+          background: none;
+          border: none;
+          color: white;
+          font-size: 22px;
+          cursor: pointer;
+          margin-bottom: 24px;
+          padding: 0 4px;
+          align-self: center;
+        }
+        .nav-brand {
+          display: none;
+          color: white;
+          font-weight: bold;
+          font-size: 16px;
+          margin-bottom: 20px;
+          white-space: nowrap;
+          align-items: center;
+          gap: 8px;
+        }
+        .sidebar.open .nav-brand {
+          display: flex;
+        }
+        .sidebar ul {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+          width: 100%;
+        }
+        .sidebar ul li a {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          color: white;
+          text-decoration: none;
+          padding: 10px 8px;
+          border-radius: 6px;
+          white-space: nowrap;
+          transition: background 0.15s;
+          justify-content: center;
+        }
+        .sidebar ul li a:hover {
+          background: rgba(255,255,255,0.15);
+        }
+        .sidebar ul li a .icon {
+          font-size: 20px;
+          flex-shrink: 0;
+          width: 24px;
+          text-align: center;
+        }
+        .nav-label {
+          display: none;
+        }
+        .sidebar.open .nav-label {
+          display: inline;
+        }
+        .auth-controls {
+          margin-top: auto;
+          width: 100%;
+          padding-top: 12px;
+        }
+        .auth-controls button,
+        .auth-controls a {
+          width: 100%;
+          white-space: nowrap;
+        }
+      </style>
 
-                    </div>
-                </div>
-            </nav>
-        `;
+      <nav class="sidebar" id="sidebar">
+        <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+
+        <div class="nav-brand">
+          <img src="/images/ApplogowithoutName.png" height="28">
+          CrowdControl
+        </div>
+
+        <ul>
+          <li><a href="index.html"><span class="icon">🏠</span><span class="nav-label">Home</span></a></li>
+          <li><a href="map.html"><span class="icon">🗺️</span><span class="nav-label">Heatmap</span></a></li>
+          <li><a href="newPost.html"><span class="icon">✏️</span><span class="nav-label">New Post</span></a></li>
+          <li><a href="socialfeed.html"><span class="icon">💬</span><span class="nav-label">Social</span></a></li>
+          <li><a href="profile.html"><span class="icon">👤</span><span class="nav-label">Profile</span></a></li>
+        </ul>
+
+        <div id="authControls" class="auth-controls"></div>
+      </nav>
+    `;
+
+    document.getElementById('sidebarToggle').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('open');
+    });
   }
+
   renderAuthControls() {
     const authControls = this.querySelector("#authControls");
-
-    // Initialize with invisible placeholder to maintain layout space
-    authControls.innerHTML = `<div class="btn btn-outline-light" style="visibility: hidden; min-width: 80px;">Log out</div>`;
-
     onAuthStateChanged(auth, (user) => {
-      let updatedAuthControl;
       if (user) {
-        updatedAuthControl = `<button class="btn btn-outline-light" id="signOutBtn" type="button" style="min-width: 80px;">Log out</button>`;
-        authControls.innerHTML = updatedAuthControl;
-        const signOutBtn = authControls.querySelector("#signOutBtn");
-        signOutBtn?.addEventListener("click", logoutUser);
+        authControls.innerHTML = `<button class="btn btn-outline-light w-100" id="signOutBtn" type="button">🔓 <span class="nav-label">Log out</span></button>`;
+        authControls.querySelector("#signOutBtn").addEventListener("click", logoutUser);
       } else {
-        updatedAuthControl = `<a class="btn btn-outline-light" id="loginBtn" href="/login.html" style="min-width: 80px;">Log in</a>`;
-        authControls.innerHTML = updatedAuthControl;
+        authControls.innerHTML = `<a class="btn btn-outline-light w-100" href="/login.html">🔑 <span class="nav-label">Log in</span></a>`;
       }
     });
   }
