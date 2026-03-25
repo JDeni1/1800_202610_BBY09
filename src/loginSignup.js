@@ -14,7 +14,7 @@ function initAuthUI() {
   const loginForm = document.getElementById("loginForm");
   const signupForm = document.getElementById("signupForm");
 
-  const redirectUrl = "map.html";
+  const redirectUrl = "index.html";
 
   // --- Helpers ---
 
