@@ -94,11 +94,10 @@ async function getCSVdata() {
     const lat = parseFloat(columns[3]);
     const lng = parseFloat(columns[4]);
 
-    // Create a Firestore document for each monitor point using the extracted data
     await setDoc(doc(db, "monitor_points", id), {
       name,
       category,
-      location: new GeoPoint(lat, lng), //convert to GeoPoint for geospatial queries
+      location: new GeoPoint(lat, lng),
       lat,
       lng,
     });
@@ -107,5 +106,4 @@ async function getCSVdata() {
   console.log("Seeding complete");
 }
 
-// Expose the function to the global scope so it can be called from the browser console
 window.getCSVdata = getCSVdata;
