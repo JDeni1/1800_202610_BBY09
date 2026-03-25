@@ -49,19 +49,6 @@ export async function logoutUser() {
   window.location.href = "map.html";
 }
 
-/* Greets logged-in user by name, or shows "Guest" on map.html */
-// export function checkAuthState() {
-//   onAuthStateChanged(auth, (user) => {
-//     if (!window.location.pathname.endsWith("map.html")) return;
-
-//     const message = user
-//       ? `Hello, ${user.displayName || user.email}!`
-//       : "Hello, Guest!";
-
-//     $("#welcomeMessage").text(message);
-//   });
-// }
-
 /* onAuthReady(callback) */
 export function onAuthReady(callback) {
   return onAuthStateChanged(auth, callback);

@@ -83,9 +83,6 @@ const STATUS_LABELS = {
   5: { label: "Very Crowded", colour: "#d50000" },
 };
 
-// ------------------------------------------------------------
-// Build a collapsed card — title + time only, click to expand
-// ------------------------------------------------------------
 function createReportCard(report) {
   const card = document.createElement("div");
   card.className = "card mb-3 shadow-sm";
@@ -217,9 +214,6 @@ function createReportCard(report) {
   return card;
 }
 
-// ------------------------------------------------------------
-// Load comments for a specific update and render them
-// ------------------------------------------------------------
 async function loadComments(spotId, updateId, card) {
   const commentsList = card.querySelector(".comments-list");
   commentsList.innerHTML = `<p class="text-muted" style="font-size:13px;">Loading comments…</p>`;

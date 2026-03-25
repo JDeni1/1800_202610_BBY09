@@ -81,9 +81,6 @@ async function populateSpotDropdown() {
   }
 }
 
-// ------------------------------------------------------------
-// Euclidean distance — good enough for nearby Vancouver spots
-// ------------------------------------------------------------
 function getDistance(lat1, lng1, lat2, lng2) {
   return Math.sqrt(Math.pow(lat2 - lat1, 2) + Math.pow(lng2 - lng1, 2));
 }
@@ -148,7 +145,6 @@ async function handleSubmit() {
       imageUrl = await uploadImage(imageFile, spotId);
     }
 
-    // Write new update to subcollection
     await addDoc(collection(db, "eventspots", spotId, "updates"), {
       caption: caption,
       details: details || "",
@@ -158,7 +154,6 @@ async function handleSubmit() {
       owner: user.uid,
     });
 
-    // 3Update latest_status on the parent eventspot
     await updateDoc(doc(db, "eventspots", spotId), {
       latest_status: selectedRating,
       last_updated: serverTimestamp(),
@@ -189,9 +184,6 @@ function resetForm() {
   selectedRating = 0;
 }
 
-// ------------------------------------------------------------
-// Feedback helpers
-// ------------------------------------------------------------
 function showError(msg) {
   const el = document.getElementById("formFeedback");
   el.className = "alert alert-danger mt-3";
