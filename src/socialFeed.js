@@ -114,13 +114,11 @@ function createReportCard(report) {
         </div>
         <div class="d-flex align-items-center gap-2">
           <span style="${badgeStyle}">${report.status}/5 — ${status.label}</span>
-          <span class="toggle-arrow" style="font-size:18px;color:#888;">▼</span>
         </div>
       </div>
     </div>
 
     <!-- Expanded detail view — hidden by default -->
-    <div class="expanded-view" style="display:none;border-top:1px solid #eee;">
       <div class="card-body">
 
         ${
@@ -161,25 +159,7 @@ function createReportCard(report) {
         <div class="comment-feedback mt-2" style="font-size:13px;"></div>
 
       </div>
-    </div>
   `;
-
-  // Toggle expand / collapse on header click
-  const collapsedView = card.querySelector(".collapsed-view");
-  const expandedView = card.querySelector(".expanded-view");
-  const arrow = card.querySelector(".toggle-arrow");
-
-  collapsedView.addEventListener("click", async () => {
-    const isOpen = expandedView.style.display !== "none";
-    if (isOpen) {
-      expandedView.style.display = "none";
-      arrow.textContent = "▼";
-    } else {
-      expandedView.style.display = "block";
-      arrow.textContent = "▲";
-      await loadComments(report.spotId, report.updateId, card);
-    }
-  });
 
   // Post comment on button click
   const commentInput = card.querySelector(".comment-input");
