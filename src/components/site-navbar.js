@@ -120,8 +120,9 @@ class SiteNavbar extends HTMLElement {
     `;
 
     document.getElementById('sidebarToggle').addEventListener('click', () => {
-      document.getElementById('sidebar').classList.toggle('open');
-    });
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('search-bar').classList.toggle('sidebar-open');
+});
   }
 
   renderAuthControls() {

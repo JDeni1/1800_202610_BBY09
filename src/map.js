@@ -38,8 +38,10 @@ const statusColours = {
 // ------------------------------------------------------------
 // Map initialization
 // ------------------------------------------------------------
+let map; //global!
+
 function showMap() {
-  const map = new maplibregl.Map({
+  map = new maplibregl.Map({
     container: "map",
     style: `https://api.maptiler.com/maps/streets/style.json?key=${import.meta.env.VITE_MAPTILER_KEY}`,
     center: [-123.0965, 49.2827], // centered on downtown Vancouver
@@ -332,3 +334,38 @@ legend.innerHTML = `
 
 // Replace 'map' with whatever your map container div's ID is
 document.getElementById("map").appendChild(legend);
+
+//This will make the search bar usable to search for locations:
+const searchInput = document.getElementById('search-input');
+const suggestionBox = document.createElement('ul');
+suggestionBox.id = 'search-suggestions';
+document.getElementById('search-bar').appendChild(suggestionBox);
+
+searchInput.addEventListener('input', async () => {
+  const query = searchInput.value.trim();
+  suggestionBox.innerHTML = '';
+  if (query.length < 3) return;
+
+  const res = await fetch(
+    `https://api.maptiler.com/geocoding/${encodeURIComponent(query)}.json?key=${import.meta.env.VITE_MAPTILER_KEY}`
+  );
+  const data = await res.json();
+
+  data.features.forEach((feature) => {
+    const li = document.createElement('li');
+    li.textContent = feature.place_name;
+    li.addEventListener('click', () => {
+      map.flyTo({ center: feature.center, zoom: 14 });
+      searchInput.value = feature.place_name;
+      suggestionBox.innerHTML = '';
+    });
+    suggestionBox.appendChild(li);
+  });
+});
+
+// Close suggestions when clicking outside
+document.addEventListener('click', (e) => {
+  if (!document.getElementById('search-bar').contains(e.target)) {
+    suggestionBox.innerHTML = '';
+  }
+});
