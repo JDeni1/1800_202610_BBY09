@@ -39,6 +39,7 @@ const statusColours = {
 // Map initialization
 // ------------------------------------------------------------
 let map; //global!
+let searchPin = null;
 
 function showMap() {
   map = new maplibregl.Map({
