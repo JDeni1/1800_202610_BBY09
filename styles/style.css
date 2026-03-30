@@ -2,3 +2,10 @@ body {
   margin-left: 60px; /* matches collapsed sidebar width */
   transition: margin-left 0.25s ease;
 }
+
+#filterWrapper {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 9999;
+}

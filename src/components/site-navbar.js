@@ -1,5 +1,6 @@
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "/src/firebaseConfig.js";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "/src/firebaseConfig.js";
 import { logoutUser } from "/src/authentication.js";
 
 class SiteNavbar extends HTMLElement {
@@ -17,7 +18,7 @@ class SiteNavbar extends HTMLElement {
           top: 0; left: 0;
           height: 100vh;
           width: 60px;
-          background: #0d6efd;
+          background: #989fa9;
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -112,7 +113,7 @@ class SiteNavbar extends HTMLElement {
           <li><a href="map.html"><span class="icon">🗺️</span><span class="nav-label">Heatmap</span></a></li>
           <li><a href="newPost.html"><span class="icon">✏️</span><span class="nav-label">New Post</span></a></li>
           <li><a href="socialfeed.html"><span class="icon">💬</span><span class="nav-label">Social</span></a></li>
-          <li><a href="profile.html"><span class="icon">👤</span><span class="nav-label">Profile</span></a></li>
+          <li><a href="profile.html"><span class="icon" id="profileNavIcon">👤</span><span class="nav-label">Profile</span></a></li>
         </ul>
 
         <div id="authControls" class="auth-controls"></div>
@@ -123,16 +124,47 @@ class SiteNavbar extends HTMLElement {
   document.getElementById('sidebar').classList.toggle('open');
   document.getElementById('search-bar').classList.toggle('sidebar-open');
 });
+    document.getElementById("sidebarToggle").addEventListener("click", () => {
+      document.getElementById("sidebar").classList.toggle("open");
+    });
+  }
+
+  async updateProfileIcon(user) {
+    const icon = this.querySelector("#profileNavIcon");
+
+    if (!user) {
+      icon.innerHTML = "👤";
+      return;
+    }
+
+    try {
+      const userRef = doc(db, "users", user.uid);
+      const snap = await getDoc(userRef);
+
+      if (snap.exists()) {
+        const data = snap.data();
+
+        if (data.profileImage) {
+          icon.innerHTML = `<img src="${data.profileImage}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;">`;
+        }
+      }
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   renderAuthControls() {
     const authControls = this.querySelector("#authControls");
     onAuthStateChanged(auth, (user) => {
+      this.updateProfileIcon(user);
+
       if (user) {
-        authControls.innerHTML = `<button class="btn btn-outline-light w-100" id="signOutBtn" type="button">🔓 <span class="nav-label">Log out</span></button>`;
-        authControls.querySelector("#signOutBtn").addEventListener("click", logoutUser);
+        authControls.innerHTML = `<button class="btn btn-outline-light w-100" id="signOutBtn" type="button"><img src = "/images/log-out.png" height = "28"> <span class="nav-label">Log out</span></button>`;
+        authControls
+          .querySelector("#signOutBtn")
+          .addEventListener("click", logoutUser);
       } else {
-        authControls.innerHTML = `<a class="btn btn-outline-light w-100" href="/login.html">🔑 <span class="nav-label">Log in</span></a>`;
+        authControls.innerHTML = `<a class="btn btn-outline-light w-100" href="/login.html"><img src = "/images/log-in.png" height = "28"><span class="nav-label">Log in</span></a>`;
       }
     });
   }

@@ -181,7 +181,7 @@ async function showEventSpots(map) {
        <p><strong>Status:</strong> ${latest.status} / 5</p>
        <p>${latest.details}</p>
        <p><em>${latest.timestamp?.toDate().toLocaleString() ?? ""}</em></p>
-       ${latest.image_url ? `<img src="${latest.image_url}" style="width:100%;border-radius:6px;margin-top:6px;">` : ""}`
+       ${latest.image ? `<img src="${latest.image}" style="width:100%;border-radius:6px;margin-top:6px;">` : ""}`
         : `<h3>${spot.name}</h3>
        <p>${spot.description}</p>
        <p>No reports yet.</p>`;
@@ -197,13 +197,13 @@ async function showEventSpots(map) {
       // Wire up the submit button after popup is in the DOM
       setTimeout(() => {
         const btn = document.getElementById("report-submit");
-        //console.log("button found?", btn); //This will tell you if the button is found in console, you can remove it if its affecting you.
+        //console.log("button found?", btn);
         btn?.addEventListener("click", async () => {
-          //console.log("button clicked!"); //Ad nauseum, you can remove this too if it's affecting you.
+          //console.log("button clicked!");
           const status = parseInt(
             document.getElementById("report-status").value,
           );
-          const details = document.getElementById("report-details").value; //this will tell you in the console that you updated the spot or "marker".
+          const details = document.getElementById("report-details").value;
 
           if (!status || status < 1 || status > 5) {
             alert("Please enter a crowd level between 1 and 5.");
@@ -297,8 +297,6 @@ function listenToEventSpots(map) {
         marker.getElement().style.backgroundColor = spot.latest_status
           ? statusColours[spot.latest_status]
           : "#9e9e9e";
-
-        pulseMarker(spot.id, spot.latest_status);
       }
     });
   });

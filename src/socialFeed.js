@@ -11,9 +11,8 @@ import {
 
 const auth = getAuth();
 
-// ------------------------------------------------------------
-// On DOM ready — load and render all reports
-// ------------------------------------------------------------
+let cardsReady = false;
+
 document.addEventListener("DOMContentLoaded", async () => {
   const feed = document.getElementById("socialFeed");
   feed.innerHTML = `<p class="text-muted">Loading reports…</p>`;
@@ -30,15 +29,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     allReports.forEach((report) => {
       feed.appendChild(createReportCard(report));
     });
+
+    cardsReady = true;
+    applyFilters();
   } catch (err) {
     console.error("Failed to load social feed:", err);
     feed.innerHTML = `<p class="text-danger">Failed to load reports. Please try again.</p>`;
   }
 });
 
-// ------------------------------------------------------------
-// Fetch every update from every eventspot, sorted newest first
-// ------------------------------------------------------------
 async function getAllReports() {
   const spotsSnapshot = await getDocs(collection(db, "eventspots"));
   const allReports = [];
@@ -62,7 +61,6 @@ async function getAllReports() {
     });
   }
 
-  // Sort all reports across all spots newest first
   allReports.sort((a, b) => {
     const timeA = a.timestamp?.toDate().getTime() ?? 0;
     const timeB = b.timestamp?.toDate().getTime() ?? 0;
@@ -72,9 +70,6 @@ async function getAllReports() {
   return allReports;
 }
 
-// ------------------------------------------------------------
-// Status config
-// ------------------------------------------------------------
 const STATUS_LABELS = {
   1: { label: "Not Crowded", colour: "#00c853" },
   2: { label: "Slightly Busy", colour: "#aeea00" },
@@ -104,13 +99,12 @@ function createReportCard(report) {
   const badgeStyle = `background-color:${status.colour};color:#fff;padding:3px 10px;border-radius:12px;font-size:13px;font-weight:600;`;
 
   card.innerHTML = `
-    <!-- Collapsed header — always visible, click to expand -->
-    <div class="card-body collapsed-view" style="cursor:pointer;">
+    <div class="card-body">
       <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h5 class="card-title mb-0">${report.spotName}</h5>
-            <p class="mb-0" style="font-size:14px;font-weight:500;">${report.caption || ""}</p>
-            <p class="text-muted mb-0" style="font-size:13px;">${time}</p>
+          <h5 class="card-title mb-0">${report.spotName}</h5>
+          <p class="mb-0" style="font-size:14px;font-weight:500;">${report.caption || ""}</p>
+          <p class="text-muted mb-0" style="font-size:13px;">${time}</p>
         </div>
         <div class="d-flex align-items-center gap-2">
           <span style="${badgeStyle}">${report.status}/5 — ${status.label}</span>
@@ -118,53 +112,53 @@ function createReportCard(report) {
       </div>
     </div>
 
-    <!-- Expanded detail view — hidden by default -->
-      <div class="card-body">
+    <div class="card-body">
+      ${
+        report.details
+          ? `<p class="mb-3">${report.details}</p>`
+          : `<p class="text-muted mb-3"><em>No description provided.</em></p>`
+      }
 
-        ${
-          report.details
-            ? `<p class="mb-3">${report.details}</p>`
-            : `<p class="text-muted mb-3"><em>No description provided.</em></p>`
-        }
+      ${
+        report.image
+          ? `<img src="${report.image}"
+               alt="Crowd photo"
+               class="img-fluid rounded mb-3"
+               style="max-height:240px;object-fit:cover;width:100%;">`
+          : ""
+      }
 
-        ${
-          report.image_url
-            ? `<img src="${report.image_url}"
-                 alt="Crowd photo"
-                 class="img-fluid rounded mb-3"
-                 style="max-height:240px;object-fit:cover;width:100%;">`
-            : ""
-        }
+      <hr>
+      <h6 class="mb-3">Comments</h6>
 
-        <hr>
-        <h6 class="mb-3">Comments</h6>
-
-        <!-- Comments injected here -->
-        <div class="comments-list mb-3">
-          <p class="text-muted" style="font-size:13px;">Loading comments…</p>
-        </div>
-
-        <!-- Add comment input -->
-        <div class="d-flex gap-2">
-          <input
-            type="text"
-            class="form-control comment-input"
-            placeholder="Add a comment…"
-            style="font-size:14px;"
-          />
-          <button class="btn btn-primary btn-sm comment-submit" style="white-space:nowrap;">
-            Post
-          </button>
-        </div>
-        <div class="comment-feedback mt-2" style="font-size:13px;"></div>
-
+      <div class="comments-list mb-3">
+        <p class="text-muted" style="font-size:13px;">Loading comments…</p>
       </div>
+
+      <div class="d-flex gap-2">
+        <input
+          type="text"
+          class="form-control comment-input"
+          placeholder="Add a comment…"
+          style="font-size:14px;"
+        />
+        <button class="btn btn-primary btn-sm comment-submit" style="white-space:nowrap;">
+          Post
+        </button>
+      </div>
+      <div class="comment-feedback mt-2" style="font-size:13px;"></div>
+    </div>
   `;
 
-  // Post comment on button click
+  card.dataset.status = report.status;
+  card.dataset.spotName = (report.spotName || "").toLowerCase().trim();
+
   const commentInput = card.querySelector(".comment-input");
   const commentBtn = card.querySelector(".comment-submit");
   const commentFeedback = card.querySelector(".comment-feedback");
+
+  // Load comments immediately when card is created
+  loadComments(report.spotId, report.updateId, card);
 
   commentBtn.addEventListener("click", async (e) => {
     e.stopPropagation();
@@ -177,7 +171,6 @@ function createReportCard(report) {
     );
   });
 
-  // Post comment on Enter key
   commentInput.addEventListener("keydown", async (e) => {
     if (e.key === "Enter") {
       e.stopPropagation();
@@ -206,7 +199,7 @@ async function loadComments(spotId, updateId, card) {
     const snapshot = await getDocs(q);
 
     if (snapshot.empty) {
-      commentsList.innerHTML = `<p class="text-muted" style="font-size:13px;">No comments yet. Be the first!</p>`;
+      commentsList.innerHTML = `<p class="text-muted" style="font-size:13px;">No comments yet. Be the first to comment!</p>`;
       return;
     }
 
@@ -220,9 +213,6 @@ async function loadComments(spotId, updateId, card) {
   }
 }
 
-// ------------------------------------------------------------
-// Build a single comment element
-// ------------------------------------------------------------
 function createCommentEl(data) {
   const div = document.createElement("div");
   div.className = "mb-2 pb-2";
@@ -244,10 +234,6 @@ function createCommentEl(data) {
   return div;
 }
 
-// ------------------------------------------------------------
-// Post a comment to Firestore under:
-// eventspots/{spotId}/updates/{updateId}/comments
-// ------------------------------------------------------------
 async function postComment(spotId, updateId, inputEl, feedbackEl, card) {
   const text = inputEl.value.trim();
   const user = auth.currentUser;
@@ -280,7 +266,6 @@ async function postComment(spotId, updateId, inputEl, feedbackEl, card) {
     feedbackEl.textContent = "Comment posted!";
     setTimeout(() => (feedbackEl.textContent = ""), 2000);
 
-    // Reload comments to show the new one immediately
     await loadComments(spotId, updateId, card);
   } catch (err) {
     console.error("Failed to post comment:", err);
@@ -288,3 +273,55 @@ async function postComment(spotId, updateId, inputEl, feedbackEl, card) {
     feedbackEl.textContent = "Failed to post comment. Try again.";
   }
 }
+
+const activeFilters = { status: new Set(), location: new Set() };
+
+function applyFilters() {
+  if (!cardsReady) return;
+
+  document.querySelectorAll("#socialFeed .card").forEach((card) => {
+    const cardStatus = parseInt(card.dataset.status);
+    const cardSpot = card.dataset.spotName || "";
+
+    const statusMatch =
+      activeFilters.status.size === 0 || activeFilters.status.has(cardStatus);
+
+    const locationMatch =
+      activeFilters.location.size === 0 ||
+      [...activeFilters.location].some((loc) => cardSpot.includes(loc));
+
+    card.style.display = statusMatch && locationMatch ? "" : "none";
+  });
+}
+
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest(".filter-btn");
+  if (!btn) return;
+
+  const filterType = btn.dataset.filter.toLowerCase();
+  const label = btn.innerText.trim().toLowerCase();
+
+  if (filterType === "crowd-level") {
+    const level = parseInt(label);
+    if (isNaN(level)) return;
+    activeFilters.status.has(level)
+      ? (activeFilters.status.delete(level), btn.classList.remove("active"))
+      : (activeFilters.status.add(level), btn.classList.add("active"));
+  } else if (filterType === "location") {
+    activeFilters.location.has(label)
+      ? (activeFilters.location.delete(label), btn.classList.remove("active"))
+      : (activeFilters.location.add(label), btn.classList.add("active"));
+  }
+
+  applyFilters();
+});
+
+document.addEventListener("click", (e) => {
+  if (!e.target.closest("#clearFilterBtn")) return;
+  activeFilters.status.clear();
+  activeFilters.location.clear();
+  document
+    .querySelectorAll(".filter-btn.active")
+    .forEach((b) => b.classList.remove("active"));
+  applyFilters();
+});
