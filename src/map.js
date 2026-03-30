@@ -294,8 +294,11 @@ function listenToEventSpots(map) {
       if (change.type === "modified") {
         const marker = markerMap[spot.id];
         if (!marker) return;
-        marker.getElement().style.backgroundColor = //This will change the colour to match the spot
-          spot.latest_status ? statusColours[spot.latest_status] : "#9e9e9e";
+        marker.getElement().style.backgroundColor = spot.latest_status
+          ? statusColours[spot.latest_status]
+          : "#9e9e9e";
+
+        pulseMarker(spot.id, spot.latest_status);
       }
     });
   });
@@ -337,36 +340,132 @@ legend.innerHTML = `
 document.getElementById("map").appendChild(legend);
 
 //This will make the search bar usable to search for locations:
-const searchInput = document.getElementById('search-input');
-const suggestionBox = document.createElement('ul');
-suggestionBox.id = 'search-suggestions';
-document.getElementById('search-bar').appendChild(suggestionBox);
+const searchInput = document.getElementById("search-input");
+const suggestionBox = document.createElement("ul");
+suggestionBox.id = "search-suggestions";
+document.getElementById("search-bar").appendChild(suggestionBox);
 
-searchInput.addEventListener('input', async () => {
+searchInput.addEventListener("input", async () => {
   const query = searchInput.value.trim();
-  suggestionBox.innerHTML = '';
+  suggestionBox.innerHTML = "";
   if (query.length < 3) return;
 
   const res = await fetch(
-    `https://api.maptiler.com/geocoding/${encodeURIComponent(query)}.json?key=${import.meta.env.VITE_MAPTILER_KEY}`
+    `https://api.maptiler.com/geocoding/${encodeURIComponent(query)}.json?key=${import.meta.env.VITE_MAPTILER_KEY}`,
   );
   const data = await res.json();
 
   data.features.forEach((feature) => {
-    const li = document.createElement('li');
+    const li = document.createElement("li");
     li.textContent = feature.place_name;
-    li.addEventListener('click', () => {
+    li.addEventListener("click", () => {
       map.flyTo({ center: feature.center, zoom: 14 });
       searchInput.value = feature.place_name;
-      suggestionBox.innerHTML = '';
+      suggestionBox.innerHTML = "";
+
+      // Remove existing search pin if there is one
+      if (searchPin) searchPin.remove();
+
+      // Drop a new pin at the searched location
+      searchPin = new maplibregl.Marker({ color: "#1E90FF" })
+        .setLngLat(feature.center)
+        .setPopup(
+          new maplibregl.Popup({ offset: 25 }).setHTML(
+            `<strong>${feature.place_name}</strong>`,
+          ),
+        )
+        .addTo(map);
     });
     suggestionBox.appendChild(li);
   });
 });
 
+function setupSuggestionVisibility(searchInput, suggestionBox) {
+  // Show suggestions only when input has text AND is focused
+  searchInput.addEventListener("input", () => {
+    const query = searchInput.value.trim();
+    if (query.length >= 3) {
+      suggestionBox.classList.add("visible");
+    } else {
+      suggestionBox.classList.remove("visible");
+    }
+  });
+
+  // Hide suggestions when input loses focus
+  searchInput.addEventListener("blur", () => {
+    setTimeout(() => {
+      suggestionBox.classList.remove("visible");
+    }, 150); // allows clicks on suggestions
+  });
+
+  // Hide suggestions when clicking outside the search bar
+  document.addEventListener("click", (e) => {
+    if (!document.getElementById("search-bar").contains(e.target)) {
+      suggestionBox.classList.remove("visible");
+    }
+  });
+}
+
 // Close suggestions when clicking outside
-document.addEventListener('click', (e) => {
-  if (!document.getElementById('search-bar').contains(e.target)) {
-    suggestionBox.innerHTML = '';
+document.addEventListener("click", (e) => {
+  if (!document.getElementById("search-bar").contains(e.target)) {
+    suggestionBox.innerHTML = "";
   }
 });
+
+//This function here will make the spot have a halo around it when updated:
+function pulseMarker(spotId, status) {
+  console.log("pulseMarker called", spotId, status);
+  const marker = markerMap[spotId];
+  console.log("marker found?", marker);
+  if (!marker) return;
+
+  const lngLat = marker.getLngLat();
+  console.log("lngLat:", lngLat);
+  const sourceId = `pulse-${spotId}`;
+  const layerId = `pulse-layer-${spotId}`;
+
+  console.log("adding source and layer...");
+
+  map.addSource(sourceId, {
+    type: "geojson",
+    data: {
+      type: "Feature",
+      geometry: { type: "Point", coordinates: [lngLat.lng, lngLat.lat] },
+    },
+  });
+
+  map.addLayer({
+    id: layerId,
+    type: "circle",
+    source: sourceId,
+    paint: {
+      "circle-radius": 0,
+      "circle-color": statusColours[status] ?? "#9e9e9e",
+      "circle-opacity": 0.4,
+      "circle-blur": 0.5,
+    },
+  });
+
+  let radius = 0;
+  let opacity = 0.4;
+
+  function animate() {
+    radius += 0.8;
+    opacity -= 0.4 / 50;
+    map.setPaintProperty(layerId, "circle-radius", radius);
+    map.setPaintProperty(layerId, "circle-opacity", Math.max(opacity, 0));
+
+    if (radius < 40) {
+      requestAnimationFrame(animate);
+    } else {
+      if (map.getLayer(layerId)) map.removeLayer(layerId);
+      if (map.getSource(sourceId)) map.removeSource(sourceId);
+    }
+  }
+
+  requestAnimationFrame(animate);
+}
+
+//This function will call the hide/show searchsuggestions ul div:
+setupSuggestionVisibility(searchInput, suggestionBox);
