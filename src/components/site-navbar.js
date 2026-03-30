@@ -18,7 +18,7 @@ class SiteNavbar extends HTMLElement {
           top: 0; left: 0;
           height: 100vh;
           width: 60px;
-          background: #0d6efd;
+          background: #989fa9;
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -120,8 +120,8 @@ class SiteNavbar extends HTMLElement {
       </nav>
     `;
 
-    document.getElementById('sidebarToggle').addEventListener('click', () => {
-      document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById("sidebarToggle").addEventListener("click", () => {
+      document.getElementById("sidebar").classList.toggle("open");
     });
   }
 
@@ -155,10 +155,12 @@ class SiteNavbar extends HTMLElement {
       this.updateProfileIcon(user);
 
       if (user) {
-        authControls.innerHTML = `<button class="btn btn-outline-light w-100" id="signOutBtn" type="button">🔓 <span class="nav-label">Log out</span></button>`;
-        authControls.querySelector("#signOutBtn").addEventListener("click", logoutUser);
+        authControls.innerHTML = `<button class="btn btn-outline-light w-100" id="signOutBtn" type="button"><img src = "/images/log-out.png" height = "28"> <span class="nav-label">Log out</span></button>`;
+        authControls
+          .querySelector("#signOutBtn")
+          .addEventListener("click", logoutUser);
       } else {
-        authControls.innerHTML = `<a class="btn btn-outline-light w-100" href="/login.html">🔑 <span class="nav-label">Log in</span></a>`;
+        authControls.innerHTML = `<a class="btn btn-outline-light w-100" href="/login.html"><img src = "/images/log-in.png" height = "28"><span class="nav-label">Log in</span></a>`;
       }
     });
   }
