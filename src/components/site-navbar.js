@@ -17,7 +17,7 @@ class SiteNavbar extends HTMLElement {
           top: 0; left: 0;
           height: 100vh;
           width: 60px;
-          background: #0d6efd;
+          background: #989fa9;
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -108,19 +108,18 @@ class SiteNavbar extends HTMLElement {
         </div>
 
         <ul>
-          <li><a href="index.html"><span class="icon">🏠</span><span class="nav-label">Home</span></a></li>
-          <li><a href="map.html"><span class="icon">🗺️</span><span class="nav-label">Heatmap</span></a></li>
-          <li><a href="newPost.html"><span class="icon">✏️</span><span class="nav-label">New Post</span></a></li>
-          <li><a href="socialfeed.html"><span class="icon">💬</span><span class="nav-label">Social</span></a></li>
-          <li><a href="profile.html"><span class="icon">👤</span><span class="nav-label">Profile</span></a></li>
+          <li><a href="map.html"><span class="icon"><img src = "/images/maps.png" height = "28"></span><span class="nav-label">Heatmap/Home</span></a></li>
+          <li><a href="newPost.html"><span class="icon"><img src = "/images/new-post.png" height = "28"></span><span class="nav-label">New Post</span></a></li>
+          <li><a href="socialfeed.html"><span class="icon"><img src = "/images/social-network.png" height = "28"></span><span class="nav-label">Social</span></a></li>
+          <li><a href="profile.html"><span class="icon"><img src = "/images/profile.png" height = "28"></span><span class="nav-label">Profile</span></a></li>
         </ul>
 
         <div id="authControls" class="auth-controls"></div>
       </nav>
     `;
 
-    document.getElementById('sidebarToggle').addEventListener('click', () => {
-      document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById("sidebarToggle").addEventListener("click", () => {
+      document.getElementById("sidebar").classList.toggle("open");
     });
   }
 
@@ -128,10 +127,12 @@ class SiteNavbar extends HTMLElement {
     const authControls = this.querySelector("#authControls");
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        authControls.innerHTML = `<button class="btn btn-outline-light w-100" id="signOutBtn" type="button">🔓 <span class="nav-label">Log out</span></button>`;
-        authControls.querySelector("#signOutBtn").addEventListener("click", logoutUser);
+        authControls.innerHTML = `<button class="btn btn-outline-light w-100" id="signOutBtn" type="button"><img src = "/images/log-out.png" height = "28"> <span class="nav-label">Log out</span></button>`;
+        authControls
+          .querySelector("#signOutBtn")
+          .addEventListener("click", logoutUser);
       } else {
-        authControls.innerHTML = `<a class="btn btn-outline-light w-100" href="/login.html">🔑 <span class="nav-label">Log in</span></a>`;
+        authControls.innerHTML = `<a class="btn btn-outline-light w-100" href="/login.html"><img src = "/images/log-in.png" height = "28"><span class="nav-label">Log in</span></a>`;
       }
     });
   }

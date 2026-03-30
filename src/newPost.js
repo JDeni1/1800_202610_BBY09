@@ -1,6 +1,5 @@
 import { db } from "./firebaseConfig.js";
 import { getAuth } from "firebase/auth";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import {
   collection,
   addDoc,
@@ -11,26 +10,40 @@ import {
 } from "firebase/firestore";
 
 const auth = getAuth();
-const storage = getStorage();
+
 let selectedRating = 0;
 let closestSpotId = null;
+
+function toBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+  });
+}
 
 // On DOM ready
 document.addEventListener("DOMContentLoaded", async () => {
   await populateSpotDropdown();
   setupRatingListener();
 
+  document.getElementById("inputImage").addEventListener("change", (event) => {
+    const file = event.target.files[0];
+    document.getElementById("mypic-goes-here").src = file
+      ? URL.createObjectURL(file)
+      : "";
+  });
+
   const submitBtn = document.getElementById("submitBtn");
   if (!submitBtn) {
-    console.error(
-      "submitBtn not found — check newPost.html has id='submitBtn'",
-    );
+    console.error("submitBtn not found — check newPost.html");
     return;
   }
   submitBtn.addEventListener("click", handleSubmit);
 });
 
-// Populate the spot dropdown from Firestore.
+// Populate dropdown
 async function populateSpotDropdown() {
   let snapshot;
   try {
@@ -49,7 +62,6 @@ async function populateSpotDropdown() {
     select.appendChild(option);
   });
 
-  // Pre-select closest spot using geolocation
   if ("geolocation" in navigator) {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -76,7 +88,7 @@ async function populateSpotDropdown() {
           select.value = closestId;
         }
       },
-      (err) => console.warn("Geolocation unavailable for pre-selection:", err),
+      (err) => console.warn("Geolocation unavailable:", err),
     );
   }
 }
@@ -85,7 +97,7 @@ function getDistance(lat1, lng1, lat2, lng2) {
   return Math.sqrt(Math.pow(lat2 - lat1, 2) + Math.pow(lng2 - lng1, 2));
 }
 
-//Radio buttons
+// Rating
 function setupRatingListener() {
   document.querySelectorAll('input[name="crowdStatus"]').forEach((radio) => {
     radio.addEventListener("change", () => {
@@ -101,26 +113,17 @@ function updateRatingUI(rating) {
   });
 }
 
-//Images
-async function uploadImage(file, spotId) {
-  const storageRef = ref(
-    storage,
-    `updates/${spotId}/${Date.now()}_${file.name}`,
-  );
-  await uploadBytes(storageRef, file);
-  return await getDownloadURL(storageRef);
-}
-
 async function handleSubmit() {
   hideFeedback();
 
   const spotId = document.getElementById("spotSelect").value;
   const caption = document.getElementById("post-title").value.trim();
   const details = document.getElementById("detailsInput").value.trim();
-  const imageFile = document.getElementById("imageInput").files[0];
+  const imageFile = document.getElementById("inputImage").files[0];
   const user = auth.currentUser;
 
-  // Validation
+  let imageBase64 = "";
+
   if (!spotId) {
     showError("Please select a location.");
     return;
@@ -130,7 +133,7 @@ async function handleSubmit() {
     return;
   }
   if (!user) {
-    showError("You must be logged in to submit a report.");
+    showError("You must be logged in.");
     return;
   }
 
@@ -139,17 +142,15 @@ async function handleSubmit() {
   submitBtn.textContent = "Submitting…";
 
   try {
-    // Upload image if provided
-    let imageUrl = null;
     if (imageFile) {
-      imageUrl = await uploadImage(imageFile, spotId);
+      imageBase64 = await toBase64(imageFile); // full data URI: "data:image/png;base64,..."
     }
 
     await addDoc(collection(db, "eventspots", spotId, "updates"), {
       caption: caption,
       details: details || "",
       status: selectedRating,
-      image_url: imageUrl,
+      image: imageBase64, // stored as full data URI, used directly in src=""
       timestamp: serverTimestamp(),
       owner: user.uid,
     });
@@ -159,46 +160,51 @@ async function handleSubmit() {
       last_updated: serverTimestamp(),
     });
 
-    showSuccess("Report submitted! Thanks for helping the community.");
+    showSuccess("Report submitted!");
     resetForm();
   } catch (err) {
     console.error("Submit failed:", err);
-    showError("Something went wrong. Please try again.");
+    showError("Something went wrong.");
   } finally {
     submitBtn.disabled = false;
-    submitBtn.textContent = "Submit Report";
+    submitBtn.textContent = "Post Now";
   }
 }
 
-// Reset form after successful submit
+// Reset form
 function resetForm() {
   document.getElementById("spotSelect").value = closestSpotId ?? "";
   document.getElementById("detailsInput").value = "";
-  document.getElementById("imageInput").value = "";
+  document.getElementById("inputImage").value = "";
+  document.getElementById("mypic-goes-here").src = "";
+
   document.querySelectorAll('input[name="crowdStatus"]').forEach((r) => {
     r.checked = false;
   });
+
   document.querySelectorAll(".rating-label").forEach((l) => {
     l.classList.remove("active");
   });
+
   selectedRating = 0;
 }
 
+// ── Feedback helpers (were missing — caused "hideFeedback is not defined" error) ──
 function showError(msg) {
-  const el = document.getElementById("formFeedback");
-  el.className = "alert alert-danger mt-3";
+  const el = document.getElementById("form-feedback");
+  if (!el) return;
+  el.style.color = "#d50000";
   el.textContent = msg;
-  el.style.display = "block";
 }
 
 function showSuccess(msg) {
-  const el = document.getElementById("formFeedback");
-  el.className = "alert alert-success mt-3";
+  const el = document.getElementById("form-feedback");
+  if (!el) return;
+  el.style.color = "#00c853";
   el.textContent = msg;
-  el.style.display = "block";
 }
 
 function hideFeedback() {
-  const el = document.getElementById("formFeedback");
-  el.style.display = "none";
+  const el = document.getElementById("form-feedback");
+  if (el) el.textContent = "";
 }
