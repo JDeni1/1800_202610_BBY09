@@ -162,6 +162,7 @@ async function handleSubmit() {
 
     showSuccess("Report submitted!");
     resetForm();
+    window.location.href = "socialfeed.html";
   } catch (err) {
     console.error("Submit failed:", err);
     showError("Something went wrong.");
