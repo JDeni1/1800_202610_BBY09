@@ -1,5 +1,6 @@
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "/src/firebaseConfig.js";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "/src/firebaseConfig.js";
 import { logoutUser } from "/src/authentication.js";
 
 class SiteNavbar extends HTMLElement {
@@ -108,10 +109,11 @@ class SiteNavbar extends HTMLElement {
         </div>
 
         <ul>
-          <li><a href="map.html"><span class="icon"><img src = "/images/maps.png" height = "28"></span><span class="nav-label">Heatmap/Home</span></a></li>
-          <li><a href="newPost.html"><span class="icon"><img src = "/images/new-post.png" height = "28"></span><span class="nav-label">New Post</span></a></li>
-          <li><a href="socialfeed.html"><span class="icon"><img src = "/images/social-network.png" height = "28"></span><span class="nav-label">Social</span></a></li>
-          <li><a href="profile.html"><span class="icon"><img src = "/images/profile.png" height = "28"></span><span class="nav-label">Profile</span></a></li>
+          <li><a href="index.html"><span class="icon">🏠</span><span class="nav-label">Home</span></a></li>
+          <li><a href="map.html"><span class="icon">🗺️</span><span class="nav-label">Heatmap</span></a></li>
+          <li><a href="newPost.html"><span class="icon">✏️</span><span class="nav-label">New Post</span></a></li>
+          <li><a href="socialfeed.html"><span class="icon">💬</span><span class="nav-label">Social</span></a></li>
+          <li><a href="profile.html"><span class="icon" id="profileNavIcon">👤</span><span class="nav-label">Profile</span></a></li>
         </ul>
 
         <div id="authControls" class="auth-controls"></div>
@@ -123,9 +125,35 @@ class SiteNavbar extends HTMLElement {
     });
   }
 
+  async updateProfileIcon(user) {
+    const icon = this.querySelector("#profileNavIcon");
+
+    if (!user) {
+      icon.innerHTML = "👤";
+      return;
+    }
+
+    try {
+      const userRef = doc(db, "users", user.uid);
+      const snap = await getDoc(userRef);
+
+      if (snap.exists()) {
+        const data = snap.data();
+
+        if (data.profileImage) {
+          icon.innerHTML = `<img src="${data.profileImage}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;">`;
+        }
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
   renderAuthControls() {
     const authControls = this.querySelector("#authControls");
     onAuthStateChanged(auth, (user) => {
+      this.updateProfileIcon(user);
+
       if (user) {
         authControls.innerHTML = `<button class="btn btn-outline-light w-100" id="signOutBtn" type="button"><img src = "/images/log-out.png" height = "28"> <span class="nav-label">Log out</span></button>`;
         authControls

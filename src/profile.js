@@ -2,14 +2,27 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap";
 import "/styles/style.css";
 
-import { db } from "./firebaseConfig.js";
-import { auth } from "./firebaseConfig.js";
+import { db, auth } from "./firebaseConfig.js";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 
-// uploadImage()
-// Listens for file input changes and triggers Base64 encoding
-function uploadImage() {
+function displayProfileImage(imageDataUrl) {
+  const imgElement = document.getElementById("profileImage");
+  if (!imgElement || !imageDataUrl) return;
+  imgElement.src = imageDataUrl;
+}
+
+async function saveProfileImage(userId, imageDataUrl) {
+  try {
+    const userDocRef = doc(db, "users", userId);
+    await setDoc(userDocRef, { profileImage: imageDataUrl }, { merge: true });
+    displayProfileImage(imageDataUrl);
+  } catch (error) {
+    console.error("Error saving profile image:", error);
+  }
+}
+
+function uploadImage(userId) {
   const inputImage = document.getElementById("inputImage");
   if (!inputImage) return;
 
@@ -19,78 +32,43 @@ function uploadImage() {
 
     const reader = new FileReader();
 
-    reader.onload = (e) => {
-      const base64String = e.target.result.split(",")[1];
-      saveProfileImage(base64String);
+    reader.onload = async (e) => {
+      const imageDataUrl = e.target.result;
+      await saveProfileImage(userId, imageDataUrl);
     };
 
     reader.readAsDataURL(file);
   });
 }
 
-// saveProfileImage(base64String)
-async function saveProfileImage(base64String) {
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-      console.error("No user is signed in.");
-      return;
-    }
+async function populateUserInfo(userId) {
+  try {
+    const userRef = doc(db, "users", userId);
+    const userSnap = await getDoc(userRef);
 
-    try {
-      const userDocRef = doc(db, "users", user.uid);
-      await setDoc(userDocRef, { profileImage: base64String }, { merge: true });
-      console.log("Profile image saved successfully!");
-      displayProfileImage(base64String);
-    } catch (error) {
-      console.error("Error saving profile image:", error);
-    }
-  });
-}
+    if (!userSnap.exists()) return;
 
-// displayProfileImage(base64String)
-function displayProfileImage(base64String) {
-  const imgElement = document.getElementById("profileImage");
-  if (!imgElement) {
-    console.error("No image element found.");
-    return;
+    const userData = userSnap.data();
+    const profileImage = userData.profileImage || "";
+
+    if (profileImage) {
+      displayProfileImage(profileImage);
+    }
+  } catch (error) {
+    console.error("Error loading user profile:", error);
   }
-  imgElement.src = `data:image/png;base64,${base64String}`;
 }
 
-// populateUserInfo()
-function populateUserInfo() {
+function initProfilePage() {
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
-      console.log("No user is signed in.");
+      window.location.href = "login.html";
       return;
     }
 
-    try {
-      const userRef = doc(db, "users", user.uid);
-      const userSnap = await getDoc(userRef);
-
-      if (!userSnap.exists()) {
-        console.log("No user document found.");
-        return;
-      }
-
-      const {
-        name = "",
-        school = "",
-        city = "",
-        profileImage = "",
-      } = userSnap.data();
-
-      document.getElementById("nameInput").value = name;
-      document.getElementById("schoolInput").value = school;
-      document.getElementById("cityInput").value = city;
-      document.getElementById("profileImage").src =
-        `data:image/png;base64,${profileImage}`;
-    } catch (error) {
-      console.error("Error loading user profile:", error);
-    }
+    await populateUserInfo(user.uid);
+    uploadImage(user.uid);
   });
 }
 
-uploadImage();
-populateUserInfo();
+initProfilePage();
