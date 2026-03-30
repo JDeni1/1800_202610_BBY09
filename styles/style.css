@@ -9,3 +9,38 @@ body {
   right: 16px;
   z-index: 9999;
 }
+
+.nav-label {
+  display: none;
+}
+.sidebar.open .nav-label {
+  display: inline;
+}
+.nav-mini-label {
+  display: block;
+  font-size: 9px;
+  color: white;
+  text-align: center;
+  margin-top: 2px;
+  line-height: 1;
+}
+.sidebar.open .nav-mini-label {
+  display: none;
+}
+
+.sidebar ul li a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: white;
+  text-decoration: none;
+  padding: 10px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  transition: background 0.15s;
+  justify-content: center;
+  flex-direction: column; /* ← add this */
+}
+.sidebar.open ul li a {
+  flex-direction: row; /* ← back to row when expanded */
+}

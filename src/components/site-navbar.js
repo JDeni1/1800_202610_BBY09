@@ -109,11 +109,10 @@ class SiteNavbar extends HTMLElement {
         </div>
 
         <ul>
-          <li><a href="index.html"><span class="icon">🏠</span><span class="nav-label">Home</span></a></li>
-          <li><a href="map.html"><span class="icon">🗺️</span><span class="nav-label">Heatmap</span></a></li>
-          <li><a href="newPost.html"><span class="icon">✏️</span><span class="nav-label">New Post</span></a></li>
-          <li><a href="socialfeed.html"><span class="icon">💬</span><span class="nav-label">Social</span></a></li>
-          <li><a href="profile.html"><span class="icon" id="profileNavIcon">👤</span><span class="nav-label">Profile</span></a></li>
+          <li><a href="map.html"><span class="icon"><img src="/images/maps.png" height="28"></span><span class="nav-mini-label">Map</span><span class="nav-label">Heatmap</span></a></li>
+          <li><a href="newPost.html"><span class="icon"><img src="/images/post.png" height="28"></span><span class="nav-mini-label">Post</span><span class="nav-label">New Post</span></a></li>
+          <li><a href="socialfeed.html"><span class="icon"><img src="/images/people.png" height="28"></span><span class="nav-mini-label">Social</span><span class="nav-label">Social</span></a></li>
+          <li><a href="profile.html"><span class="icon"><img src="/images/user.png" height="28"></span><span class="nav-mini-label">Profile</span><span class="nav-label">Profile</span></a></li>
         </ul>
 
         <div id="authControls" class="auth-controls"></div>
@@ -164,7 +163,7 @@ class SiteNavbar extends HTMLElement {
           .querySelector("#signOutBtn")
           .addEventListener("click", logoutUser);
       } else {
-        authControls.innerHTML = `<a class="btn btn-outline-light w-100" href="/login.html"><img src = "/images/log-in.png" height = "28"><span class="nav-label">Log in</span></a>`;
+        authControls.innerHTML = `<a class="btn btn-outline-light w-100" href="/login.html">LOGIN<span class="nav-label"></span></a>`;
       }
     });
   }
