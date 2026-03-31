@@ -119,9 +119,11 @@ class SiteNavbar extends HTMLElement {
       </nav>
     `;
 
-    document.getElementById("sidebarToggle").addEventListener("click", () => {
-      document.getElementById("sidebar").classList.toggle("open");
-    });
+  document.getElementById("sidebarToggle").addEventListener("click", () => {
+  document.getElementById("sidebar").classList.toggle("open");
+  const searchBar = document.getElementById("search-bar");
+  if (searchBar) searchBar.classList.toggle("sidebar-open"); // safe null check
+});
   }
 
   async updateProfileIcon(user) {
