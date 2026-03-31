@@ -393,3 +393,4 @@ function pulseMarker(spotId, status) {
 
   requestAnimationFrame(animate);
 }
+//test
