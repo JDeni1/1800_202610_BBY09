@@ -16,6 +16,7 @@ import {
   serverTimestamp,
   onSnapshot,
 } from "firebase/firestore";
+import { initSearchBar } from "./searchbar.js";
 
 // ------------------------------------------------------------
 // Global state
@@ -38,14 +39,13 @@ const statusColours = {
 // ------------------------------------------------------------
 // Map initialization
 // ------------------------------------------------------------
-let map; //global!
-let searchPin = null;
+let map;
 
 function showMap() {
   map = new maplibregl.Map({
     container: "map",
     style: `https://api.maptiler.com/maps/streets/style.json?key=${import.meta.env.VITE_MAPTILER_KEY}`,
-    center: [-123.0965, 49.2827], // centered on downtown Vancouver
+    center: [-123.0965, 49.2827],
     zoom: 13,
   });
 
@@ -54,9 +54,9 @@ function showMap() {
   map.once("load", async () => {
     await addUserPin(map);
     await showEventSpots(map);
-    //await seedEventSpots(); // Uncomment to seed Firestore (run once only)
-    console.log("Map loaded!");
     listenToEventSpots(map);
+    initSearchBar(map);
+    console.log("Map loaded!");
   });
 }
 
@@ -136,9 +136,7 @@ async function getLatestUpdate(spotId) {
 }
 
 // ------------------------------------------------------------
-// Render event spot markers on the map.
-// Colour is based on latest_status (1=green → 5=red, null=grey).
-// Clicking a marker fetches and shows the most recent update.
+// Render event spot markers on the map
 // ------------------------------------------------------------
 async function showEventSpots(map) {
   let spots = [];
@@ -154,7 +152,7 @@ async function showEventSpots(map) {
 
     const colour = spot.latest_status
       ? statusColours[spot.latest_status]
-      : "#9e9e9e"; // grey = no reports yet
+      : "#9e9e9e";
 
     const el = document.createElement("div");
     el.style.width = "20px";
@@ -171,35 +169,30 @@ async function showEventSpots(map) {
 
     markerMap[spot.id] = marker;
 
-    // On click: fetch latest update and show in popup
     el.addEventListener("click", async () => {
       const latest = await getLatestUpdate(spot.id);
 
       const popupHTML = latest
         ? `<h3>${spot.name}</h3>
-       <p>${spot.description}</p>
-       <p><strong>Status:</strong> ${latest.status} / 5</p>
-       <p>${latest.details}</p>
-       <p><em>${latest.timestamp?.toDate().toLocaleString() ?? ""}</em></p>
-       ${latest.image ? `<img src="${latest.image}" style="width:100%;border-radius:6px;margin-top:6px;">` : ""}`
+           <p>${spot.description}</p>
+           <p><strong>Status:</strong> ${latest.status} / 5</p>
+           <p>${latest.details}</p>
+           <p><em>${latest.timestamp?.toDate().toLocaleString() ?? ""}</em></p>
+           ${latest.image ? `<img src="${latest.image}" style="width:100%;border-radius:6px;margin-top:6px;">` : ""}`
         : `<h3>${spot.name}</h3>
-       <p>${spot.description}</p>
-       <p>No reports yet.</p>`;
+           <p>${spot.description}</p>
+           <p>No reports yet.</p>`;
 
-      const reportForm = `
-  `;
+      const reportForm = ``;
 
       const popup = new maplibregl.Popup({ offset: 25 })
         .setLngLat([spot.location.lng, spot.location.lat])
         .setHTML(popupHTML + reportForm)
         .addTo(map);
 
-      // Wire up the submit button after popup is in the DOM
       setTimeout(() => {
         const btn = document.getElementById("report-submit");
-        //console.log("button found?", btn);
         btn?.addEventListener("click", async () => {
-          //console.log("button clicked!");
           const status = parseInt(
             document.getElementById("report-status").value,
           );
@@ -217,6 +210,7 @@ async function showEventSpots(map) {
     });
   });
 }
+
 // ------------------------------------------------------------
 // Seed Firestore with initial event spots (run once only)
 // ------------------------------------------------------------
@@ -267,16 +261,14 @@ async function seedEventSpots() {
   console.log("Done seeding!");
 }
 
-/**------------------------------------------------------------
- * This function will listen to the HTML popup above and will update 
- * the Firestore database with the new report and latest_status for the event spot.
- ----------------------------------------------------------------*/
-
+// ------------------------------------------------------------
+// Submit a crowd report for a spot
+// ------------------------------------------------------------
 async function submitReport(spotId, status, details) {
   console.log("submitReport called", spotId, status, details);
   await addDoc(collection(db, "eventspots", spotId, "updates"), {
-    status: status,
-    details: details,
+    status,
+    details,
     timestamp: serverTimestamp(),
   });
 
@@ -286,7 +278,9 @@ async function submitReport(spotId, status, details) {
   });
 }
 
-//This function will listen to the event spots and update the eventspots category in firestore:
+// ------------------------------------------------------------
+// Live listener — updates marker colours in real time
+// ------------------------------------------------------------
 function listenToEventSpots(map) {
   onSnapshot(collection(db, "eventspots"), (snapshot) => {
     snapshot.docChanges().forEach((change) => {
@@ -297,12 +291,16 @@ function listenToEventSpots(map) {
         marker.getElement().style.backgroundColor = spot.latest_status
           ? statusColours[spot.latest_status]
           : "#9e9e9e";
-      }
+          //called pulsemarker from below:
+       pulseMarker(spot.id, spot.latest_status);
+        }
     });
   });
 }
 
-// This adds a colour status bar to the bottom right of the map to let people know how busy the area is.
+// ------------------------------------------------------------
+// Busyness legend
+// ------------------------------------------------------------
 const existingLegend = document.getElementById("map-legend");
 if (existingLegend) existingLegend.remove();
 
@@ -334,96 +332,18 @@ legend.innerHTML = `
   </div>
 `;
 
-// Replace 'map' with whatever your map container div's ID is
 document.getElementById("map").appendChild(legend);
 
-//This will make the search bar usable to search for locations:
-const searchInput = document.getElementById("search-input");
-const suggestionBox = document.createElement("ul");
-suggestionBox.id = "search-suggestions";
-document.getElementById("search-bar").appendChild(suggestionBox);
-
-searchInput.addEventListener("input", async () => {
-  const query = searchInput.value.trim();
-  suggestionBox.innerHTML = "";
-  if (query.length < 3) return;
-
-  const res = await fetch(
-    `https://api.maptiler.com/geocoding/${encodeURIComponent(query)}.json?key=${import.meta.env.VITE_MAPTILER_KEY}`,
-  );
-  const data = await res.json();
-
-  data.features.forEach((feature) => {
-    const li = document.createElement("li");
-    li.textContent = feature.place_name;
-    li.addEventListener("click", () => {
-      map.flyTo({ center: feature.center, zoom: 14 });
-      searchInput.value = feature.place_name;
-      suggestionBox.innerHTML = "";
-
-      // Remove existing search pin if there is one
-      if (searchPin) searchPin.remove();
-
-      // Drop a new pin at the searched location
-      searchPin = new maplibregl.Marker({ color: "#1E90FF" })
-        .setLngLat(feature.center)
-        .setPopup(
-          new maplibregl.Popup({ offset: 25 }).setHTML(
-            `<strong>${feature.place_name}</strong>`,
-          ),
-        )
-        .addTo(map);
-    });
-    suggestionBox.appendChild(li);
-  });
-});
-
-function setupSuggestionVisibility(searchInput, suggestionBox) {
-  // Show suggestions only when input has text AND is focused
-  searchInput.addEventListener("input", () => {
-    const query = searchInput.value.trim();
-    if (query.length >= 3) {
-      suggestionBox.classList.add("visible");
-    } else {
-      suggestionBox.classList.remove("visible");
-    }
-  });
-
-  // Hide suggestions when input loses focus
-  searchInput.addEventListener("blur", () => {
-    setTimeout(() => {
-      suggestionBox.classList.remove("visible");
-    }, 150); // allows clicks on suggestions
-  });
-
-  // Hide suggestions when clicking outside the search bar
-  document.addEventListener("click", (e) => {
-    if (!document.getElementById("search-bar").contains(e.target)) {
-      suggestionBox.classList.remove("visible");
-    }
-  });
-}
-
-// Close suggestions when clicking outside
-document.addEventListener("click", (e) => {
-  if (!document.getElementById("search-bar").contains(e.target)) {
-    suggestionBox.innerHTML = "";
-  }
-});
-
-//This function here will make the spot have a halo around it when updated:
+// ------------------------------------------------------------
+// Pulse animation on marker update
+// ------------------------------------------------------------
 function pulseMarker(spotId, status) {
-  console.log("pulseMarker called", spotId, status);
   const marker = markerMap[spotId];
-  console.log("marker found?", marker);
   if (!marker) return;
 
   const lngLat = marker.getLngLat();
-  console.log("lngLat:", lngLat);
   const sourceId = `pulse-${spotId}`;
   const layerId = `pulse-layer-${spotId}`;
-
-  console.log("adding source and layer...");
 
   map.addSource(sourceId, {
     type: "geojson",
@@ -464,6 +384,3 @@ function pulseMarker(spotId, status) {
 
   requestAnimationFrame(animate);
 }
-
-//This function will call the hide/show searchsuggestions ul div:
-setupSuggestionVisibility(searchInput, suggestionBox);
