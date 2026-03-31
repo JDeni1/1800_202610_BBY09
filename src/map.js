@@ -62,6 +62,15 @@ function showMap() {
 
 showMap();
 
+//This adds a button to center the map at my current location.
+map.addControl(
+  new maplibregl.GeolocateControl({
+    positionOptions: { enableHighAccuracy: true },
+    trackUserLocation: false, // you can turn this on if you want live tracking
+    showUserLocation: true
+  }),
+  "top-right"
+);
 // ------------------------------------------------------------
 // User location pin
 // ------------------------------------------------------------
@@ -291,9 +300,9 @@ function listenToEventSpots(map) {
         marker.getElement().style.backgroundColor = spot.latest_status
           ? statusColours[spot.latest_status]
           : "#9e9e9e";
-          //called pulsemarker from below:
-       pulseMarker(spot.id, spot.latest_status);
-        }
+        //called pulsemarker from below:
+        pulseMarker(spot.id, spot.latest_status);
+      }
     });
   });
 }
