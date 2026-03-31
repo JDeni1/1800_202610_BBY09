@@ -1,7 +1,7 @@
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "/src/firebaseConfig.js";
-import { logoutUser } from "/src/authentication.js";
+import { auth, db } from "../firebaseConfig.js";
+import { logoutUser } from "../authentication.js";
 
 class SiteNavbar extends HTMLElement {
   constructor() {

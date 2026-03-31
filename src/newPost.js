@@ -150,7 +150,7 @@ async function handleSubmit() {
       caption: caption,
       details: details || "",
       status: selectedRating,
-      image: imageBase64, // stored as full data URI, used directly in src=""
+      image: imageBase64, // stored as full data URI
       timestamp: serverTimestamp(),
       owner: user.uid,
     });
@@ -189,7 +189,17 @@ function resetForm() {
 
   selectedRating = 0;
 }
-
+document.getElementById("inputImage").addEventListener("change", function (e) {
+  const file = e.target.files[0];
+  const img = document.getElementById("mypic-goes-here");
+  if (file) {
+    img.src = URL.createObjectURL(file);
+    img.style.display = "block";
+  } else {
+    img.src = "";
+    img.style.display = "none";
+  }
+});
 // ── Feedback helpers (were missing — caused "hideFeedback is not defined" error) ──
 function showError(msg) {
   const el = document.getElementById("form-feedback");
