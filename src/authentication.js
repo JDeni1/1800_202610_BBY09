@@ -1,6 +1,4 @@
-import { auth } from "/src/firebaseConfig.js";
-import { db } from "/src/firebaseConfig.js";
-
+import { auth, db } from "./firebaseConfig.js";
 import { doc, setDoc } from "firebase/firestore";
 import {
   signInWithEmailAndPassword,
