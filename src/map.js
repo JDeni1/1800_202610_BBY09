@@ -263,7 +263,7 @@ async function showEventSpots(map) {
 }
 
 // ------------------------------------------------------------
-// Seed Firestore with initial event spots
+// Seed Firestore with initial event spots (See spotsImporter.js file to see the parser in action)
 // ------------------------------------------------------------
 import { seedEventSpotsFromCSV } from "./spotsImporter.js";
 
@@ -353,34 +353,49 @@ function pulseMarker(spotId, status) {
   const sourceId = `pulse-${spotId}`;
   const layerId = `pulse-layer-${spotId}`;
 
-  map.addSource(sourceId, {
-    type: "geojson",
-    data: {
-      type: "Feature",
-      geometry: { type: "Point", coordinates: [lngLat.lng, lngLat.lat] },
-    },
-  });
+  const geojson = {
+    type: "Feature",
+    geometry: { type: "Point", coordinates: [lngLat.lng, lngLat.lat] },
+  };
 
-  map.addLayer({
-    id: layerId,
-    type: "circle",
-    source: sourceId,
-    paint: {
-      "circle-radius": 0,
-      "circle-color": statusColours[status] ?? "#9e9e9e",
-      "circle-opacity": 0.4,
-      "circle-blur": 0.5,
-    },
-  });
+  // --- SOURCE ---
+  const existingSource = map.getSource(sourceId);
+  if (existingSource) {
+    existingSource.setData(geojson);
+  } else {
+    map.addSource(sourceId, {
+      type: "geojson",
+      data: geojson,
+    });
+  }
 
+  // --- LAYER ---
+  if (!map.getLayer(layerId)) {
+    map.addLayer({
+      id: layerId,
+      type: "circle",
+      source: sourceId,
+      paint: {
+        "circle-radius": 0,
+        "circle-color": statusColours[status] ?? "#9e9e9e",
+        "circle-opacity": 0.4,
+        "circle-blur": 0.5,
+      },
+    });
+  }
+
+  // --- ANIMATION ---
   let radius = 0;
   let opacity = 0.4;
 
   function animate() {
     radius += 0.8;
     opacity -= 0.4 / 50;
-    map.setPaintProperty(layerId, "circle-radius", radius);
-    map.setPaintProperty(layerId, "circle-opacity", Math.max(opacity, 0));
+
+    if (map.getLayer(layerId)) {
+      map.setPaintProperty(layerId, "circle-radius", radius);
+      map.setPaintProperty(layerId, "circle-opacity", Math.max(opacity, 0));
+    }
 
     if (radius < 40) {
       requestAnimationFrame(animate);
