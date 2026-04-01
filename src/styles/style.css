@@ -20,7 +20,7 @@ body {
 .nav-mini-label {
   display: block;
   font-size: 9px;
-  color: white;
+  color: rgb(0, 0, 0);
   text-align: center;
   margin-top: 2px;
   line-height: 1;
@@ -48,4 +48,102 @@ body {
 
 #filterWrapper {
   background-color: azure;
+}
+
+/*-------------------NAV BAR-------------------------------*/
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 60px;
+  background: #ffffffe8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 0;
+  transition: width 0.25s ease;
+  overflow: hidden;
+  z-index: 1000;
+}
+.sidebar.open {
+  width: 220px;
+  align-items: flex-start;
+  padding: 12px;
+}
+.sidebar-toggle {
+  background: none;
+  border: none;
+  color: black;
+  font-size: 22px;
+  cursor: pointer;
+  margin-bottom: 24px;
+  padding: 0 4px;
+  align-self: center;
+}
+.nav-brand {
+  display: none;
+  color: black;
+  font-weight: bold;
+  font-size: 16px;
+  margin-bottom: 20px;
+  white-space: nowrap;
+  align-items: center;
+  gap: 8px;
+}
+.sidebar.open .nav-brand {
+  display: flex;
+}
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+.sidebar ul li a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: black;
+  text-decoration: none;
+  padding: 10px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  transition: background 0.15s;
+  justify-content: center;
+}
+.sidebar ul li a:hover {
+  background: rgba(0, 0, 0, 0.144);
+}
+.sidebar ul li a .icon {
+  font-size: 20px;
+  flex-shrink: 0;
+  width: 24px;
+  text-align: center;
+}
+.nav-label {
+  display: none;
+}
+.sidebar.open .nav-label {
+  display: inline;
+}
+.auth-controls {
+  margin-top: auto;
+  width: 100%;
+  padding-top: 12px;
+}
+.auth-controls button,
+.auth-controls a {
+  width: 100%;
+  white-space: nowrap;
+}
+.btn-outline-black {
+  color: black;
+  border: 2px solid black;
+  background-color: transparent;
+}
+
+.btn-outline-black:hover {
+  background-color: black;
+  color: white;
 }
