@@ -41,36 +41,78 @@ const statusColours = {
 // ------------------------------------------------------------
 let map;
 
-function showMap() {
+// Optional: show a loading overlay immediately
+document.getElementById("map-loading").style.display = "block";
+
+// 1. Map initializer that accepts a dynamic center
+function showMap(center) {
   map = new maplibregl.Map({
     container: "map",
     style: `https://api.maptiler.com/maps/streets/style.json?key=${import.meta.env.VITE_MAPTILER_KEY}`,
-    center: [-123.0965, 49.2827],
+    center,
     zoom: 13,
   });
 
   map.addControl(new maplibregl.NavigationControl(), "top-right");
+
+  // Add geolocate button to the top right of the map:
+  map.addControl(
+    new maplibregl.GeolocateControl({
+      positionOptions: { enableHighAccuracy: true },
+      trackUserLocation: false,
+      showUserLocation: true,
+    }),
+    "top-right"
+  );
 
   map.once("load", async () => {
     await addUserPin(map);
     await showEventSpots(map);
     listenToEventSpots(map);
     initSearchBar(map);
+
+    // Hide loading overlay
+    document.getElementById("map-loading").style.display = "none";
+
     console.log("Map loaded!");
   });
 }
 
-showMap();
+// 2. Bootstrap that gets user location, then calls showMap()
+function startMap() {
+  console.log("Requesting geolocation…");
 
-//This adds a button to center the map at my current location.
-map.addControl(
-  new maplibregl.GeolocateControl({
-    positionOptions: { enableHighAccuracy: true },
-    trackUserLocation: false, // you can turn this on if you want live tracking
-    showUserLocation: true
-  }),
-  "top-right"
-);
+  // ⚡ 3-second fallback timer
+  const fallbackTimer = setTimeout(() => {
+    console.log("Geolocation slow — using fallback");
+    showMap([-123.0965, 49.2827]); // your default
+  }, 3000);
+
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      clearTimeout(fallbackTimer);
+      console.log("Geolocation success:", pos.coords);
+
+      const { latitude, longitude } = pos.coords;
+      showMap([longitude, latitude]);
+    },
+    (err) => {
+      clearTimeout(fallbackTimer);
+      console.warn("Geolocation failed:", err);
+
+      showMap([-123.0965, 49.2827]); // fallback
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 8000,
+      maximumAge: 60000, // ⚡ reuse last known location for 1 minute
+    }
+  );
+}
+
+// 3. Start everything
+startMap();
+
 // ------------------------------------------------------------
 // User location pin
 // ------------------------------------------------------------
@@ -393,4 +435,3 @@ function pulseMarker(spotId, status) {
 
   requestAnimationFrame(animate);
 }
-//test
