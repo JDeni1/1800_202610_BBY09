@@ -18,21 +18,39 @@ export function initSearchBar(map) {
     const query = searchInput.value.trim();
     suggestionBox.innerHTML = "";
 
-    if (query.length < 3) {
+    if (query.length < 2) {
       suggestionBox.classList.remove("visible");
       return;
     }
 
-    const res = await fetch(
-      `https://api.maptiler.com/geocoding/${encodeURIComponent(query)}.json?key=${import.meta.env.VITE_MAPTILER_KEY}`
-    );
+    // Improved geocoding request where you can search up Landmarks and Locations now:
+    const url = `https://api.maptiler.com/geocoding/${encodeURIComponent(
+      query
+    )}.json?key=${import.meta.env.VITE_MAPTILER_KEY}&limit=8&autocomplete=true&types=poi,address`;
+
+    const res = await fetch(url);
     const data = await res.json();
 
-    data.features.forEach((feature) => {
+    if (!data.features || data.features.length === 0) {
+      suggestionBox.classList.remove("visible");
+      return;
+    }
+
+    // Sort POIs first (BC Place, Science World, etc.) then exact addresses:
+    const sorted = data.features.sort((a, b) => {
+      const aIsPOI = a.place_type.includes("poi");
+      const bIsPOI = b.place_type.includes("poi");
+      return aIsPOI === bIsPOI ? 0 : aIsPOI ? -1 : 1;
+    });
+
+    sorted.forEach((feature) => {
       const li = document.createElement("li");
-      li.textContent = feature.place_name;
+
+      // Cleaner display name
+      li.textContent = feature.text || feature.place_name;
+
       li.addEventListener("click", () => {
-        map.flyTo({ center: feature.center, zoom: 14 });
+        map.flyTo({ center: feature.center, zoom: 15 });
         searchInput.value = feature.place_name;
         suggestionBox.innerHTML = "";
         suggestionBox.classList.remove("visible");
@@ -48,6 +66,7 @@ export function initSearchBar(map) {
           )
           .addTo(map);
       });
+
       suggestionBox.appendChild(li);
     });
 
