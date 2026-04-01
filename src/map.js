@@ -263,54 +263,11 @@ async function showEventSpots(map) {
 }
 
 // ------------------------------------------------------------
-// Seed Firestore with initial event spots (run once only)
+// Seed Firestore with initial event spots
 // ------------------------------------------------------------
-async function seedEventSpots() {
-  const spots = [
-    {
-      id: "bc-place",
-      name: "BC Place",
-      description: "FIFA 2026 venue",
-      location: { lat: 49.2766, lng: -123.1113 },
-    },
-    {
-      id: "commercial-broadway",
-      name: "Commercial-Broadway Station",
-      description: "Busiest SkyTrain station",
-      location: { lat: 49.2625, lng: -123.0689 },
-    },
-    {
-      id: "pne",
-      name: "PNE",
-      description: "Pacific National Exhibition",
-      location: { lat: 49.2837, lng: -123.0394 },
-    },
-    {
-      id: "stadium-chinatown",
-      name: "Stadium-Chinatown Station",
-      description: "Main hub to BC Place",
-      location: { lat: 49.2796, lng: -123.1123 },
-    },
-    {
-      id: "renfrew",
-      name: "Renfrew Skytrain Station",
-      description: "Transit connection to PNE",
-      location: { lat: 49.2589, lng: -123.0479 },
-    },
-  ];
+import { seedEventSpotsFromCSV } from "./spotsImporter.js";
 
-  for (const spot of spots) {
-    await setDoc(doc(db, "eventspots", spot.id), {
-      name: spot.name,
-      description: spot.description,
-      location: spot.location,
-      latest_status: null,
-      last_updated: serverTimestamp(),
-    });
-    console.log("Seeded:", spot.name);
-  }
-  console.log("Done seeding!");
-}
+seedEventSpotsFromCSV();
 
 // ------------------------------------------------------------
 // Submit a crowd report for a spot
