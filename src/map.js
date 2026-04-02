@@ -36,6 +36,8 @@ const statusColours = {
   5: "#d50000", // red    - very busy
 };
 
+let lastVisit = 0;
+
 // ------------------------------------------------------------
 // Map initialization
 // ------------------------------------------------------------
@@ -70,6 +72,7 @@ function showMap(center) {
     await showEventSpots(map);
     listenToEventSpots(map);
     initSearchBar(map);
+    pulseRecentUpdates();
 
     // Hide loading overlay
     document.getElementById("map-loading").style.display = "none";
@@ -82,7 +85,7 @@ function showMap(center) {
 function startMap() {
   console.log("Requesting geolocation…");
 
-  // ⚡ 3-second fallback timer
+  // 3-second fallback timer
   const fallbackTimer = setTimeout(() => {
     console.log("Geolocation slow — using fallback");
     showMap([-123.0965, 49.2827]); // your default
@@ -100,12 +103,12 @@ function startMap() {
       clearTimeout(fallbackTimer);
       console.warn("Geolocation failed:", err);
 
-      showMap([-123.0965, 49.2827]); // fallback
+      showMap([-123.0965, 49.2827]); // fallback if the geolocation cant reach your location
     },
     {
       enableHighAccuracy: true,
       timeout: 8000,
-      maximumAge: 60000, // ⚡ reuse last known location for 1 minute
+      maximumAge: 60000, // reuse last known location for 1 minute
     }
   );
 }
@@ -378,26 +381,26 @@ function pulseMarker(spotId, status) {
       paint: {
         "circle-radius": 0,
         "circle-color": statusColours[status] ?? "#9e9e9e",
-        "circle-opacity": 0.4,
-        "circle-blur": 0.5,
+        "circle-opacity": 0.5,
+        "circle-blur": 0.6,
       },
     });
   }
 
-  // --- ANIMATION ---
+  // --- ANIMATION (longer + smoother) ---
   let radius = 0;
-  let opacity = 0.4;
+  let opacity = 0.5;
 
   function animate() {
-    radius += 0.8;
-    opacity -= 0.4 / 50;
+    radius += 0.25;          // slower expansion
+    opacity -= 0.5 / 180;    // fade over ~3 seconds
 
     if (map.getLayer(layerId)) {
       map.setPaintProperty(layerId, "circle-radius", radius);
       map.setPaintProperty(layerId, "circle-opacity", Math.max(opacity, 0));
     }
 
-    if (radius < 40) {
+    if (radius < 80) {        // bigger ring, longer duration
       requestAnimationFrame(animate);
     } else {
       if (map.getLayer(layerId)) map.removeLayer(layerId);
@@ -407,3 +410,26 @@ function pulseMarker(spotId, status) {
 
   requestAnimationFrame(animate);
 }
+
+//This will make the heat bubbles visible when you return to the heatmap:
+async function pulseRecentUpdates() {
+  const snapshot = await getDocs(collection(db, "eventspots"));
+  const now = Date.now();
+
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    const updated = data.last_updated?.toMillis?.();
+
+    if (!updated) return;
+
+    // Only pulse if the update happened AFTER your last visit
+    if (updated > lastVisit) {
+      pulseMarker(doc.id, data.latest_status);
+    }
+  });
+
+  // Update lastVisit AFTER checking
+  lastVisit = now;
+}
+
+

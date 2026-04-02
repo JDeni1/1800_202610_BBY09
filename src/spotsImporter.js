@@ -35,7 +35,7 @@ export async function seedEventSpotsFromCSV() {
       { merge: true }
     );
 
-    console.log("Seeded:", row.monitor_point);
+    //console.log("Seeded:", row.monitor_point); //Uncomment if you want to see the console log the seeded spots!
   }
 
   console.log("Done seeding CSV spots!");
