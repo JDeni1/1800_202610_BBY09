@@ -36,6 +36,7 @@ const statusColours = {
   5: "#d50000", // red    - very busy
 };
 
+//supposedly lets the spot bubble pop up when you load the map again. I dont know if it works, might delete it later.
 let lastVisit = 0;
 
 // ------------------------------------------------------------
