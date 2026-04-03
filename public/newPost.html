@@ -5,6 +5,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script type="module" src="/src/components/site-navbar.js"></script>
+    <script type="module" src="/src/app.js"></script>
+    <script type="module" src="/src/newPost.js"></script>
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
       rel="stylesheet"
@@ -20,7 +22,7 @@
       <h1>Make a Post</h1>
 
       <div class="field">
-        <label for="post-title">Caption</label>
+        <label for="card-title">Caption</label>
         <input type="text" id="post-title" placeholder="Title" />
       </div>
 
@@ -41,7 +43,7 @@
           style="font-size: 0.85rem; color: #555"
         />
         <img
-          id="mypic-goes-here"
+          id="picture"
           width="100"
           height="100"
           style="
@@ -93,8 +95,5 @@
       <button id="submitBtn" type="button">Post Now</button>
       <div id="form-feedback"></div>
     </div>
-
-    <script type="module" src="/src/app.js"></script>
-    <script type="module" src="/src/newPost.js"></script>
   </body>
 </html>

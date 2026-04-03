@@ -5,7 +5,7 @@ import { db } from "./firebaseConfig.js";
 import { collection, getDocs } from "firebase/firestore";
 import { onAuthReady } from "./authentication.js";
 
-/* Displays the logged-in user's name, or "Guest" if not signed in */
+/* Function 1 */
 function showName() {
   const nameElement = document.getElementById("name-goes-here");
 
@@ -22,7 +22,7 @@ function showName() {
   });
 }
 
-/* Fetches posts from Firestore and renders them into the social feed */
+/* Function 2*/
 async function displayCardsDynamically() {
   const cardTemplate = document.getElementById("postCardTemplate");
   const cardContainer = document.getElementById("allPosts-goes-here");
@@ -36,7 +36,6 @@ async function displayCardsDynamically() {
       const post = doc.data();
       const newCard = cardTemplate.content.cloneNode(true);
 
-      // Title and description
       newCard.querySelector(".card-title").textContent =
         post.caption || "New Post";
       newCard.querySelector(".card-text").textContent =
