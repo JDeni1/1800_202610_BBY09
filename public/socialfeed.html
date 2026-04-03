@@ -6,17 +6,19 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script type="module" src="/src/components/site-navbar.js"></script>
+    <script type="module" src="/src/app.js"></script>
+    <script type="module" src="/src/socialFeed.js"></script>
   </head>
 
   <body>
-    <!-- our own navbar goes here -->
+    <!-- NAV BAR -->
     <site-navbar></site-navbar>
 
     <div class="container py-4" style="max-width: 680px">
-      <h1 class="mb-1">Social Feed</h1>
-      <p class="text-muted mb-4">Latest crowd reports from around Vancouver.</p>
+      <!-- <h1 class="mb-1">Social Feed</h1>
+      <p class="text-muted mb-4">Latest crowd posts from around Vancouver.</p> -->
 
-      <!-- All report cards are injected here by socialFeed.js -->
+      <!-- Posts Created by Social Feed-->
       <div id="socialFeed"></div>
     </div>
 
@@ -124,9 +126,5 @@
         </ul>
       </div>
     </div>
-
-    <!--Script-->
-    <script type="module" src="/src/app.js"></script>
-    <script type="module" src="/src/socialFeed.js"></script>
   </body>
 </html>

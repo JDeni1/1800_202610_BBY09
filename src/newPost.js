@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   document.getElementById("inputImage").addEventListener("change", (event) => {
     const file = event.target.files[0];
-    document.getElementById("mypic-goes-here").src = file
+    document.getElementById("picture").src = file
       ? URL.createObjectURL(file)
       : "";
   });
@@ -177,7 +177,7 @@ function resetForm() {
   document.getElementById("spotSelect").value = closestSpotId ?? "";
   document.getElementById("detailsInput").value = "";
   document.getElementById("inputImage").value = "";
-  document.getElementById("mypic-goes-here").src = "";
+  document.getElementById("picture").src = "";
 
   document.querySelectorAll('input[name="crowdStatus"]').forEach((r) => {
     r.checked = false;
@@ -191,7 +191,7 @@ function resetForm() {
 }
 document.getElementById("inputImage").addEventListener("change", function (e) {
   const file = e.target.files[0];
-  const img = document.getElementById("mypic-goes-here");
+  const img = document.getElementById("picture");
   if (file) {
     img.src = URL.createObjectURL(file);
     img.style.display = "block";
