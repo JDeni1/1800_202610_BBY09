@@ -5,10 +5,10 @@ import { db } from "./firebaseConfig.js";
 import { collection, getDocs } from "firebase/firestore";
 import { onAuthReady } from "./authentication.js";
 
-/* Function 1 */
 function showName() {
   const nameElement = document.getElementById("name-goes-here");
 
+  // Call back function to check if firebase has a user and return null if not logged on.
   onAuthReady((user) => {
     if (!nameElement) return;
 
@@ -22,18 +22,21 @@ function showName() {
   });
 }
 
-/* Function 2*/
+/* Function that fetches post from firestore database and builds HTML cards based on the data. */
 async function displayCardsDynamically() {
+  // Grabs the template and container ID to fill.
   const cardTemplate = document.getElementById("postCardTemplate");
   const cardContainer = document.getElementById("allPosts-goes-here");
 
   if (!cardTemplate || !cardContainer) return;
 
   try {
+    // Points to the location (collection of data.)
     const querySnapshot = await getDocs(collection(db, "posts"));
 
     querySnapshot.forEach((doc) => {
       const post = doc.data();
+      //clones each card with the document data
       const newCard = cardTemplate.content.cloneNode(true);
 
       newCard.querySelector(".card-title").textContent =
@@ -41,14 +44,14 @@ async function displayCardsDynamically() {
       newCard.querySelector(".card-text").textContent =
         post.description || "No description provided.";
 
-      // Location
+      // Only run if posts has an actual location.
       if (post.location) {
         const lat = post.location.lat.toFixed(2);
         const lng = post.location.lng.toFixed(2);
         newCard.querySelector(".card-location").textContent = `${lat}, ${lng}`;
       }
 
-      // Image
+      // Uses the image if the image exists as a string.
       const imgPath =
         post.image && post.image !== ""
           ? post.image
@@ -69,39 +72,27 @@ async function displayCardsDynamically() {
 showName();
 displayCardsDynamically();
 
+/* Gets the CSV data through data seeding.  */
 async function getCSVdata() {
-  // Fetch the CSV file from the public directory
   const response = await fetch("./monitor_points.csv");
-  // Read the response as text
   const text = await response.text();
 
-  // Split the CSV text into rows and skip the header row
   const rows = text.split("\n").slice(1);
 
   for (const row of rows) {
-    //skip empty rows
     if (!row.trim()) continue;
 
-    //split the row into columns (assuming comma-separated values)
     const columns = row.split(",");
-
-    // Extract the relevant data from the columns (adjust indices as needed)
     const id = columns[0];
     const name = columns[1];
     const category = columns[2];
     const lat = parseFloat(columns[3]);
     const lng = parseFloat(columns[4]);
 
-    await setDoc(doc(db, "monitor_points", id), {
-      name,
-      category,
-      location: new GeoPoint(lat, lng),
-      lat,
-      lng,
-    });
     console.log("Imported:", name);
   }
   console.log("Seeding complete");
 }
 
+/* Can be typed in the control to get the CSV data. */
 window.getCSVdata = getCSVdata;
