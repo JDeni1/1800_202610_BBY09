@@ -71,6 +71,7 @@ function showMap(center) {
   map.once("load", async () => {
     await addUserPin(map);
     await showEventSpots(map);
+    await refreshAllMarkerColours();
     listenToEventSpots(map);
     initSearchBar(map);
     pulseRecentUpdates();
@@ -202,68 +203,52 @@ async function showEventSpots(map) {
     return;
   }
 
-  spots.forEach((spot) => {
-    appState.spots.push(spot);
+  spots.forEach(async (spot) => {
+  appState.spots.push(spot);
 
-    const colour = spot.latest_status
-      ? statusColours[spot.latest_status]
-      : "#9e9e9e";
+  // Always fetch the true latest update
+  const latest = await getLatestUpdate(spot.id);
 
-    const el = document.createElement("div");
-    el.style.width = "20px";
-    el.style.height = "20px";
-    el.style.borderRadius = "50%";
-    el.style.backgroundColor = colour;
-    el.style.border = "2px solid white";
-    el.style.opacity = "0.85";
-    el.style.cursor = "pointer";
+  const colour = latest
+    ? statusColours[latest.status]
+    : "#9e9e9e";
 
-    const marker = new maplibregl.Marker({ element: el })
+  const el = document.createElement("div");
+  el.style.width = "20px";
+  el.style.height = "20px";
+  el.style.borderRadius = "50%";
+  el.style.backgroundColor = colour;
+  el.style.border = "2px solid white";
+  el.style.opacity = "0.85";
+  el.style.cursor = "pointer";
+
+  const marker = new maplibregl.Marker({ element: el })
+    .setLngLat([spot.location.lng, spot.location.lat])
+    .addTo(map);
+
+  markerMap[spot.id] = marker;
+
+  el.addEventListener("click", async () => {
+    const latest = await getLatestUpdate(spot.id);
+
+    const popupHTML = latest
+      ? `<h3>${spot.name}</h3>
+         <p>${spot.description}</p>
+         <p><strong>Status:</strong> ${latest.status} / 5</p>
+         <p>${latest.details}</p>
+         <p><em>${latest.timestamp?.toDate().toLocaleString() ?? ""}</em></p>
+         ${latest.image ? `<img src="${latest.image}" style="width:100%;border-radius:6px;margin-top:6px;">` : ""}`
+      : `<h3>${spot.name}</h3>
+         <p>${spot.description}</p>
+         <p>No reports yet.</p>`;
+
+    new maplibregl.Popup({ offset: 25 })
       .setLngLat([spot.location.lng, spot.location.lat])
+      .setHTML(popupHTML)
       .addTo(map);
-
-    markerMap[spot.id] = marker;
-
-    el.addEventListener("click", async () => {
-      const latest = await getLatestUpdate(spot.id);
-
-      const popupHTML = latest
-        ? `<h3>${spot.name}</h3>
-           <p>${spot.description}</p>
-           <p><strong>Status:</strong> ${latest.status} / 5</p>
-           <p>${latest.details}</p>
-           <p><em>${latest.timestamp?.toDate().toLocaleString() ?? ""}</em></p>
-           ${latest.image ? `<img src="${latest.image}" style="width:100%;border-radius:6px;margin-top:6px;">` : ""}`
-        : `<h3>${spot.name}</h3>
-           <p>${spot.description}</p>
-           <p>No reports yet.</p>`;
-
-      const reportForm = ``;
-
-      const popup = new maplibregl.Popup({ offset: 25 })
-        .setLngLat([spot.location.lng, spot.location.lat])
-        .setHTML(popupHTML + reportForm)
-        .addTo(map);
-
-      setTimeout(() => {
-        const btn = document.getElementById("report-submit");
-        btn?.addEventListener("click", async () => {
-          const status = parseInt(
-            document.getElementById("report-status").value,
-          );
-          const details = document.getElementById("report-details").value;
-
-          if (!status || status < 1 || status > 5) {
-            alert("Please enter a crowd level between 1 and 5.");
-            return;
-          }
-
-          await submitReport(spot.id, status, details);
-          popup.remove();
-        });
-      }, 100);
-    });
   });
+});
+
 }
 
 // ------------------------------------------------------------
@@ -294,21 +279,28 @@ async function submitReport(spotId, status, details) {
 // Live listener — updates marker colours in real time
 // ------------------------------------------------------------
 function listenToEventSpots(map) {
-  onSnapshot(collection(db, "eventspots"), (snapshot) => {
-    snapshot.docChanges().forEach((change) => {
-      const spot = { id: change.doc.id, ...change.doc.data() };
-      if (change.type === "modified") {
-        const marker = markerMap[spot.id];
-        if (!marker) return;
-        marker.getElement().style.backgroundColor = spot.latest_status
-          ? statusColours[spot.latest_status]
-          : "#9e9e9e";
-        //called pulsemarker from below:
-        pulseMarker(spot.id, spot.latest_status);
-      }
-    });
+  onSnapshot(collection(db, "eventspots"), async (snapshot) => {
+    for (const change of snapshot.docChanges()) {
+      if (change.type !== "modified") continue;
+
+      const spotId = change.doc.id;
+      const marker = markerMap[spotId];
+      if (!marker) continue;
+
+      // Fetch the true latest update
+      const latest = await getLatestUpdate(spotId);
+
+      const colour = latest
+        ? statusColours[latest.status]
+        : "#9e9e9e";
+
+      marker.getElement().style.backgroundColor = colour;
+
+      pulseMarker(spotId, latest?.status);
+    }
   });
 }
+
 
 // ------------------------------------------------------------
 // Busyness legend
@@ -433,4 +425,19 @@ async function pulseRecentUpdates() {
   lastVisit = now;
 }
 
+async function refreshAllMarkerColours() {
+  const snapshot = await getDocs(collection(db, "eventspots"));
+
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    const marker = markerMap[doc.id];
+    if (!marker) return;
+
+    const colour = data.latest_status
+      ? statusColours[data.latest_status]
+      : "#9e9e9e";
+
+    marker.getElement().style.backgroundColor = colour;
+  });
+}
 
