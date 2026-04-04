@@ -13,34 +13,39 @@ const auth = getAuth();
 
 let cardsReady = false;
 
+/* Page load so that it can be populated. */
 document.addEventListener("DOMContentLoaded", async () => {
   const feed = document.getElementById("socialFeed");
-  feed.innerHTML = `<p class="text-muted">Loading reports…</p>`;
+  // ensures users do not see an empty page
+  feed.innerHTML = `<p class="text-muted">Loading Posts…</p>`;
 
   try {
-    const allReports = await getAllReports();
+    //fetches all posts from Fire Store
+    const allPosts = await getAllPosts();
 
-    if (allReports.length === 0) {
-      feed.innerHTML = `<p class="text-muted">No reports yet. Be the first to post!</p>`;
+    if (allPosts.length === 0) {
+      feed.innerHTML = `<p class="text-muted">No posts yet. Be the first to post!</p>`;
       return;
     }
 
     feed.innerHTML = "";
-    allReports.forEach((report) => {
-      feed.appendChild(createReportCard(report));
+    allPosts.forEach((post) => {
+      feed.appendChild(createPostCard(post));
     });
 
+    // Run Filters as soon as the posts load
     cardsReady = true;
     applyFilters();
   } catch (err) {
     console.error("Failed to load social feed:", err);
-    feed.innerHTML = `<p class="text-danger">Failed to load reports. Please try again.</p>`;
+    feed.innerHTML = `<p class="text-danger">Failed to load posts. Please try again.</p>`;
   }
 });
 
-async function getAllReports() {
+/*A Nested data fetch, where we get the data from the database then update each data everytime a new post is created. */
+async function getAllPosts() {
   const spotsSnapshot = await getDocs(collection(db, "eventspots"));
-  const allReports = [];
+  const allPosts = [];
 
   for (const spotDoc of spotsSnapshot.docs) {
     const spotData = spotDoc.data();
@@ -52,7 +57,7 @@ async function getAllReports() {
     const updatesSnapshot = await getDocs(updatesQuery);
 
     updatesSnapshot.docs.forEach((updateDoc) => {
-      allReports.push({
+      allPosts.push({
         spotId: spotDoc.id,
         updateId: updateDoc.id,
         spotName: spotData.name,
@@ -61,13 +66,14 @@ async function getAllReports() {
     });
   }
 
-  allReports.sort((a, b) => {
+  //Returns posts based on newest time stamp (timeB - timeA)
+  allPosts.sort((a, b) => {
     const timeA = a.timestamp?.toDate().getTime() ?? 0;
     const timeB = b.timestamp?.toDate().getTime() ?? 0;
     return timeB - timeA;
   });
 
-  return allReports;
+  return allPosts;
 }
 
 const STATUS_LABELS = {
@@ -77,13 +83,14 @@ const STATUS_LABELS = {
   4: { label: "Busy", colour: "#ff6d00" },
   5: { label: "Very Crowded", colour: "#d50000" },
 };
-
-function createReportCard(report) {
+/* Dynamically creating each post. */
+function createPostCard(post) {
   const card = document.createElement("div");
   card.className = "card mb-3 shadow-sm";
 
-  const time = report.timestamp
-    ? report.timestamp.toDate().toLocaleString("en-CA", {
+  //Formats time.
+  const time = post.timestamp
+    ? post.timestamp.toDate().toLocaleString("en-CA", {
         month: "short",
         day: "numeric",
         year: "numeric",
@@ -92,7 +99,8 @@ function createReportCard(report) {
       })
     : "Unknown time";
 
-  const status = STATUS_LABELS[report.status] ?? {
+  //Waiting for status updates on Crowd level.
+  const status = STATUS_LABELS[post.status] ?? {
     label: "Unknown",
     colour: "#9e9e9e",
   };
@@ -102,26 +110,26 @@ function createReportCard(report) {
     <div class="card-body">
       <div class="d-flex justify-content-between align-items-center">
         <div>
-          <h5 class="card-title mb-0">${report.spotName}</h5>
-          <p class="mb-0" style="font-size:14px;font-weight:500;">${report.caption || ""}</p>
+          <h5 class="card-title mb-0">${post.spotName}</h5>
+          <p class="mb-0" style="font-size:14px;font-weight:500;">${post.caption || ""}</p>
           <p class="text-muted mb-0" style="font-size:13px;">${time}</p>
         </div>
         <div class="d-flex align-items-center gap-2">
-          <span style="${badgeStyle}">${report.status}/5 — ${status.label}</span>
+          <span style="${badgeStyle}">${post.status}/5 — ${status.label}</span>
         </div>
       </div>
     </div>
 
     <div class="card-body">
       ${
-        report.details
-          ? `<p class="mb-3">${report.details}</p>`
+        post.details
+          ? `<p class="mb-3">${post.details}</p>`
           : `<p class="text-muted mb-3"><em>No description provided.</em></p>`
       }
 
       ${
-        report.image
-          ? `<img src="${report.image}"
+        post.image
+          ? `<img src="${post.image}"
                alt="Crowd photo"
                class="img-fluid rounded mb-3"
                style="max-height:240px;object-fit:cover;width:100%;">`
@@ -150,21 +158,22 @@ function createReportCard(report) {
     </div>
   `;
 
-  card.dataset.status = report.status;
-  card.dataset.spotName = (report.spotName || "").toLowerCase().trim();
+  card.dataset.status = post.status;
+  card.dataset.spotName = (post.spotName || "").toLowerCase().trim();
 
   const commentInput = card.querySelector(".comment-input");
   const commentBtn = card.querySelector(".comment-submit");
   const commentFeedback = card.querySelector(".comment-feedback");
 
   // Load comments immediately when card is created
-  loadComments(report.spotId, report.updateId, card);
+  loadComments(post.spotId, post.updateId, card);
 
+  // Two entry point of comment attributes - pressing enter or clicking the button.
   commentBtn.addEventListener("click", async (e) => {
     e.stopPropagation();
     await postComment(
-      report.spotId,
-      report.updateId,
+      post.spotId,
+      post.updateId,
       commentInput,
       commentFeedback,
       card,
@@ -175,8 +184,8 @@ function createReportCard(report) {
     if (e.key === "Enter") {
       e.stopPropagation();
       await postComment(
-        report.spotId,
-        report.updateId,
+        post.spotId,
+        post.updateId,
         commentInput,
         commentFeedback,
         card,
@@ -187,6 +196,7 @@ function createReportCard(report) {
   return card;
 }
 
+/* Nesting within the Updates in acsending order. */
 async function loadComments(spotId, updateId, card) {
   const commentsList = card.querySelector(".comments-list");
   commentsList.innerHTML = `<p class="text-muted" style="font-size:13px;">Loading comments…</p>`;
@@ -213,11 +223,13 @@ async function loadComments(spotId, updateId, card) {
   }
 }
 
+/* UI and athetics for comments */
 function createCommentEl(data) {
   const div = document.createElement("div");
   div.className = "mb-2 pb-2";
   div.style.borderBottom = "1px solid #f0f0f0";
 
+  // Formats time for comments
   const time = data.timestamp
     ? data.timestamp.toDate().toLocaleString("en-CA", {
         month: "short",
@@ -234,17 +246,21 @@ function createCommentEl(data) {
   return div;
 }
 
+/* Gaurds the comments agenst errors once posted.  */
 async function postComment(spotId, updateId, inputEl, feedbackEl, card) {
   const text = inputEl.value.trim();
   const user = auth.currentUser;
 
   feedbackEl.textContent = "";
 
+  //No text
   if (!text) {
     feedbackEl.style.color = "#d50000";
     feedbackEl.textContent = "Comment cannot be empty.";
     return;
   }
+
+  //not logged in
   if (!user) {
     feedbackEl.style.color = "#d50000";
     feedbackEl.textContent = "You must be logged in to comment.";
@@ -276,6 +292,7 @@ async function postComment(spotId, updateId, inputEl, feedbackEl, card) {
 
 const activeFilters = { status: new Set(), location: new Set() };
 
+/* Displays the filter when clicked on common traits of each card. */
 function applyFilters() {
   if (!cardsReady) return;
 
@@ -283,13 +300,16 @@ function applyFilters() {
     const cardStatus = parseInt(card.dataset.status);
     const cardSpot = card.dataset.spotName || "";
 
+    //status must match
     const statusMatch =
       activeFilters.status.size === 0 || activeFilters.status.has(cardStatus);
 
+    //locations must match
     const locationMatch =
       activeFilters.location.size === 0 ||
       [...activeFilters.location].some((loc) => cardSpot.includes(loc));
 
+    //Both conditions must pass
     card.style.display = statusMatch && locationMatch ? "" : "none";
   });
 }
@@ -301,6 +321,7 @@ document.addEventListener("click", (e) => {
   const filterType = btn.dataset.filter.toLowerCase();
   const label = btn.innerText.trim().toLowerCase();
 
+  // Filter buttons
   if (filterType === "crowd-level") {
     const level = parseInt(label);
     if (isNaN(level)) return;
@@ -316,6 +337,7 @@ document.addEventListener("click", (e) => {
   applyFilters();
 });
 
+//Clears all active buttons.
 document.addEventListener("click", (e) => {
   if (!e.target.closest("#clearFilterBtn")) return;
   activeFilters.status.clear();

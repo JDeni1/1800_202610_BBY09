@@ -32,7 +32,7 @@ export async function seedEventSpotsFromCSV() {
         latest_status: null,
         last_updated: serverTimestamp(),
       },
-      { merge: true }
+      { merge: true },
     );
 
     console.log("Seeded:", row.monitor_point);

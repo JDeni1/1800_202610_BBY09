@@ -1,10 +1,9 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap";
 import "./styles/style.css";
-
 import { loginUser, signupUser, authErrorMessage } from "./authentication.js";
 
-/* Sets up all login and signup form interactions */
+/* The entry pointn to reading the page.*/
 function initAuthUI() {
   const alertEl = document.getElementById("authAlert");
   const loginView = document.getElementById("loginView");
@@ -16,17 +15,18 @@ function initAuthUI() {
 
   const redirectUrl = "index.html";
 
-  // --- Helpers ---
-
+  /* Expressive naming : A function that hides the login view */
   function setVisible(el, visible) {
     el.classList.toggle("d-none", !visible);
   }
 
   let errorTimeout;
 
+  /* Puts error messages as alerts and makes it visable for a certain number of times  */
   function showError(msg) {
     alertEl.textContent = msg || "";
     alertEl.classList.remove("d-none");
+    //if user triggers twice, clears the first trigger before moving on to the second one.
     clearTimeout(errorTimeout);
     errorTimeout = setTimeout(hideError, 5000);
   }
@@ -37,13 +37,13 @@ function initAuthUI() {
     clearTimeout(errorTimeout);
   }
 
+  /* Prevents double sumbitions : if the form is null, it won't crash. */
   function setSubmitDisabled(form, disabled) {
     const submitBtn = form?.querySelector('[type="submit"]');
     if (submitBtn) submitBtn.disabled = disabled;
   }
 
-  // --- Toggle between Login and Signup views ---
-
+  /*Call back functions where when clicked determins if the (login/sign up) view is visible. */
   toSignupBtn?.addEventListener("click", (e) => {
     e.preventDefault();
     hideError();
@@ -60,8 +60,7 @@ function initAuthUI() {
     loginView?.querySelector("input")?.focus();
   });
 
-  // --- Login form ---
-
+  /* Navigates from login/sign up form to index.html */
   loginForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
     hideError();
@@ -75,19 +74,20 @@ function initAuthUI() {
     }
 
     setSubmitDisabled(loginForm, true);
+    // try/catch for error handling
     try {
       await loginUser(email, password);
       location.href = redirectUrl;
     } catch (err) {
       showError(authErrorMessage(err));
       console.error(err);
+      // Will run regardless of error
     } finally {
       setSubmitDisabled(loginForm, false);
     }
   });
 
-  // --- Signup form ---
-
+  /* The same concept on login, but for sign up. */
   signupForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
     hideError();

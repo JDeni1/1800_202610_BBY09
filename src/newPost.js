@@ -14,6 +14,7 @@ const auth = getAuth();
 let selectedRating = 0;
 let closestSpotId = null;
 
+/* Turns images into base64 String Files */
 function toBase64(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -23,11 +24,12 @@ function toBase64(file) {
   });
 }
 
-// On DOM ready
+/* Initializes the input from the New Post Form */
 document.addEventListener("DOMContentLoaded", async () => {
   await populateSpotDropdown();
   setupRatingListener();
 
+  // Image prievew of user file.
   document.getElementById("inputImage").addEventListener("change", (event) => {
     const file = event.target.files[0];
     document.getElementById("picture").src = file
@@ -35,6 +37,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       : "";
   });
 
+  // Find the submit button.
   const submitBtn = document.getElementById("submitBtn");
   if (!submitBtn) {
     console.error("submitBtn not found — check newPost.html");
@@ -43,7 +46,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   submitBtn.addEventListener("click", handleSubmit);
 });
 
-// Populate dropdown
+/* Populates the events spots based on the Firestore database. */
 async function populateSpotDropdown() {
   let snapshot;
   try {
@@ -54,7 +57,7 @@ async function populateSpotDropdown() {
   }
 
   const select = document.getElementById("spotSelect");
-
+  //
   snapshot.docs.forEach((d) => {
     const option = document.createElement("option");
     option.value = d.id;
@@ -63,6 +66,7 @@ async function populateSpotDropdown() {
   });
 
   if ("geolocation" in navigator) {
+    /* Calculates the nearest location based on user position  */
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const { latitude: userLat, longitude: userLng } = pos.coords;
@@ -93,11 +97,12 @@ async function populateSpotDropdown() {
   }
 }
 
+/* Euclidean Distance to help calculate the nearest distance near the user. */
 function getDistance(lat1, lng1, lat2, lng2) {
   return Math.sqrt(Math.pow(lat2 - lat1, 2) + Math.pow(lng2 - lng1, 2));
 }
 
-// Rating
+/* Sets up the rating function for each button and updates the UI accordingly. */
 function setupRatingListener() {
   document.querySelectorAll('input[name="crowdStatus"]').forEach((radio) => {
     radio.addEventListener("change", () => {
@@ -113,6 +118,7 @@ function updateRatingUI(rating) {
   });
 }
 
+/* A Guard Function. */
 async function handleSubmit() {
   hideFeedback();
 
@@ -124,6 +130,7 @@ async function handleSubmit() {
 
   let imageBase64 = "";
 
+  // Early returns if the requirements are not met.
   if (!spotId) {
     showError("Please select a location.");
     return;
@@ -143,18 +150,20 @@ async function handleSubmit() {
 
   try {
     if (imageFile) {
-      imageBase64 = await toBase64(imageFile); // full data URI: "data:image/png;base64,..."
+      imageBase64 = await toBase64(imageFile);
     }
 
+    /* Creates the update Sub-collection to store all post information. */
     await addDoc(collection(db, "eventspots", spotId, "updates"), {
       caption: caption,
       details: details || "",
       status: selectedRating,
-      image: imageBase64, // stored as full data URI
+      image: imageBase64,
       timestamp: serverTimestamp(),
       owner: user.uid,
     });
 
+    /* Creates the eventspots collection to store all relevent locations. */
     await updateDoc(doc(db, "eventspots", spotId), {
       latest_status: selectedRating,
       last_updated: serverTimestamp(),
@@ -172,9 +181,11 @@ async function handleSubmit() {
   }
 }
 
-// Reset form
+/* After each submission, the form is reset. */
 function resetForm() {
+  //Re-evaluate nearest location.
   document.getElementById("spotSelect").value = closestSpotId ?? "";
+
   document.getElementById("detailsInput").value = "";
   document.getElementById("inputImage").value = "";
   document.getElementById("picture").src = "";
@@ -200,7 +211,8 @@ document.getElementById("inputImage").addEventListener("change", function (e) {
     img.style.display = "none";
   }
 });
-// ── Feedback helpers (were missing — caused "hideFeedback is not defined" error) ──
+
+// Helper functions.
 function showError(msg) {
   const el = document.getElementById("form-feedback");
   if (!el) return;
