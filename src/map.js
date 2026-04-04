@@ -169,38 +169,24 @@ async function showEventSpots() {
   }
 
   spots.forEach(async (spot) => {
-  appState.spots.push(spot);
+    // Always fetch the true latest update
+    const latest = await getLatestUpdate(spot.id);
 
-  // Always fetch the true latest update
-  const latest = await getLatestUpdate(spot.id);
+    const colour = latest ? STATUS_COLOURS[latest.status] : "#9e9e9e";
 
-  const colour = latest
-    ? statusColours[latest.status]
-    : "#9e9e9e";
-
-  const el = document.createElement("div");
-  el.style.width = "20px";
-  el.style.height = "20px";
-  el.style.borderRadius = "50%";
-  el.style.backgroundColor = colour;
-  el.style.border = "2px solid white";
-  el.style.opacity = "0.85";
-  el.style.cursor = "pointer";
-  spots.forEach((spot) => {
-    const colour = STATUS_COLOURS[spot.latest_status] ?? "#9e9e9e";
     const el = createMarkerElement(colour);
 
-  const marker = new maplibregl.Marker({ element: el })
-    .setLngLat([spot.location.lng, spot.location.lat])
-    .addTo(map);
+    const marker = new maplibregl.Marker({ element: el })
+      .setLngLat([spot.location.lng, spot.location.lat])
+      .addTo(map);
 
-  markerMap[spot.id] = marker;
+    markerMap[spot.id] = marker;
 
     el.addEventListener("click", async () => {
-      const latest = await getLatestUpdate(spot.id);
+      const latestUpdate = await getLatestUpdate(spot.id);
       new maplibregl.Popup({ offset: 25 })
         .setLngLat([spot.location.lng, spot.location.lat])
-        .setHTML(buildPopupHTML(spot, latest))
+        .setHTML(buildPopupHTML(spot, latestUpdate))
         .addTo(map);
     });
   });
@@ -224,7 +210,6 @@ function listenToEventSpots() {
     });
   });
 }
-
 
 // ------------------------------------------------------------
 // Busyness legend
@@ -303,15 +288,16 @@ function pulseMarker(spotId, status) {
   let opacity = 0.5;
 
   function animate() {
-    radius += 0.25;          // slower expansion
-    opacity -= 0.5 / 180;    // fade over ~3 seconds
+    radius += 0.25; // slower expansion
+    opacity -= 0.5 / 180; // fade over ~3 seconds
 
     if (map.getLayer(layerId)) {
       map.setPaintProperty(layerId, "circle-radius", radius);
       map.setPaintProperty(layerId, "circle-opacity", Math.max(opacity, 0));
     }
 
-    if (radius < 80) {        // bigger ring, longer duration
+    if (radius < 80) {
+      // bigger ring, longer duration
       requestAnimationFrame(animate);
     } else {
       if (map.getLayer(layerId)) map.removeLayer(layerId);
@@ -327,7 +313,7 @@ async function pulseRecentUpdates() {
   const snapshot = await getDocs(collection(db, "eventspots"));
   const now = Date.now();
 
-  snapshot.forEach(doc => {
+  snapshot.forEach((doc) => {
     const data = doc.data();
     const updated = data.last_updated?.toMillis?.();
 
@@ -346,16 +332,15 @@ async function pulseRecentUpdates() {
 async function refreshAllMarkerColours() {
   const snapshot = await getDocs(collection(db, "eventspots"));
 
-  snapshot.forEach(doc => {
+  snapshot.forEach((doc) => {
     const data = doc.data();
     const marker = markerMap[doc.id];
     if (!marker) return;
 
     const colour = data.latest_status
-      ? statusColours[data.latest_status]
+      ? STATUS_COLOURS[data.latest_status]
       : "#9e9e9e";
 
     marker.getElement().style.backgroundColor = colour;
   });
 }
-
