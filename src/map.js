@@ -1,13 +1,9 @@
-// ------------------------------------------------------------
-// Imports
-// ------------------------------------------------------------
 import maplibregl from "maplibre-gl";
 import { db } from "./firebaseConfig.js";
 import {
   collection,
   getDocs,
   doc,
-  setDoc,
   updateDoc,
   addDoc,
   query,
@@ -18,34 +14,34 @@ import {
 } from "firebase/firestore";
 import { initSearchBar } from "./searchbar.js";
 
-// ------------------------------------------------------------
-// Global state
-// ------------------------------------------------------------
-const appState = {
-  spots: [],
-  userLngLat: null,
+const DEFAULT_CENTER = [-123.0965, 49.2827];
+const GEOLOCATION_TIMEOUT_MS = 3000;
+const STATUS_COLOURS = {
+  1: "#00c853",
+  2: "#aeea00",
+  3: "#ffd600",
+  4: "#ff6d00",
+  5: "#d50000",
 };
 
+let map;
 const markerMap = {};
 
-const statusColours = {
-  1: "#00c853", // green  - not busy
-  2: "#aeea00", // yellow-green
-  3: "#ffd600", // yellow
-  4: "#ff6d00", // orange
-  5: "#d50000", // red    - very busy
-};
+// ------------------------------------------------------------
+// Security: sanitize strings before injecting into HTML
+// ------------------------------------------------------------
+function sanitize(str) {
+  const div = document.createElement("div");
+  div.textContent = str ?? "";
+  return div.innerHTML;
+}
 
 // ------------------------------------------------------------
 // Map initialization
 // ------------------------------------------------------------
-let map;
-
-// Optional: show a loading overlay immediately
 document.getElementById("map-loading").style.display = "block";
 
-// 1. Map initializer that accepts a dynamic center
-function showMap(center) {
+function initMap(center) {
   map = new maplibregl.Map({
     container: "map",
     style: `https://api.maptiler.com/maps/streets/style.json?key=${import.meta.env.VITE_MAPTILER_KEY}`,
@@ -54,128 +50,57 @@ function showMap(center) {
   });
 
   map.addControl(new maplibregl.NavigationControl(), "top-right");
-
-  // Add geolocate button to the top right of the map:
   map.addControl(
     new maplibregl.GeolocateControl({
       positionOptions: { enableHighAccuracy: true },
       trackUserLocation: false,
       showUserLocation: true,
     }),
-    "top-right"
+    "top-right",
   );
 
   map.once("load", async () => {
-    await addUserPin(map);
-    await showEventSpots(map);
-    listenToEventSpots(map);
+    await showEventSpots();
+    listenToEventSpots();
     initSearchBar(map);
-
-    // Hide loading overlay
+    renderLegend();
     document.getElementById("map-loading").style.display = "none";
-
-    console.log("Map loaded!");
   });
 }
 
-// 2. Bootstrap that gets user location, then calls showMap()
 function startMap() {
-  console.log("Requesting geolocation…");
+  if (!("geolocation" in navigator)) {
+    return initMap(DEFAULT_CENTER);
+  }
 
-  // ⚡ 3-second fallback timer
-  const fallbackTimer = setTimeout(() => {
-    console.log("Geolocation slow — using fallback");
-    showMap([-123.0965, 49.2827]); // your default
-  }, 3000);
+  const fallback = setTimeout(
+    () => initMap(DEFAULT_CENTER),
+    GEOLOCATION_TIMEOUT_MS,
+  );
 
   navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      clearTimeout(fallbackTimer);
-      console.log("Geolocation success:", pos.coords);
-
-      const { latitude, longitude } = pos.coords;
-      showMap([longitude, latitude]);
+    ({ coords }) => {
+      clearTimeout(fallback);
+      initMap([coords.longitude, coords.latitude]);
     },
-    (err) => {
-      clearTimeout(fallbackTimer);
-      console.warn("Geolocation failed:", err);
-
-      showMap([-123.0965, 49.2827]); // fallback
+    () => {
+      clearTimeout(fallback);
+      initMap(DEFAULT_CENTER);
     },
-    {
-      enableHighAccuracy: true,
-      timeout: 8000,
-      maximumAge: 60000, // ⚡ reuse last known location for 1 minute
-    }
+    { enableHighAccuracy: true, timeout: 8000, maximumAge: 60_000 },
   );
 }
 
-// 3. Start everything
 startMap();
 
 // ------------------------------------------------------------
-// User location pin
-// ------------------------------------------------------------
-async function addUserPin(map) {
-  if (!("geolocation" in navigator)) {
-    console.warn("Geolocation is not available in this browser");
-    return;
-  }
-
-  navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      appState.userLngLat = [pos.coords.longitude, pos.coords.latitude];
-
-      map.addSource("userLocation", {
-        type: "geojson",
-        data: {
-          type: "FeatureCollection",
-          features: [
-            {
-              type: "Feature",
-              geometry: { type: "Point", coordinates: appState.userLngLat },
-              properties: { description: "Your location" },
-            },
-          ],
-        },
-      });
-
-      map.addLayer({
-        id: "userLocation",
-        type: "circle",
-        source: "userLocation",
-        paint: {
-          "circle-color": "#1E90FF",
-          "circle-radius": 6,
-          "circle-stroke-width": 2,
-          "circle-stroke-color": "#ffffff",
-        },
-      });
-
-      map.on("click", "userLocation", (e) => {
-        const [lng, lat] = e.features[0].geometry.coordinates;
-        new maplibregl.Popup()
-          .setLngLat([lng, lat])
-          .setHTML("You are here")
-          .addTo(map);
-      });
-    },
-    (err) => console.error("Geolocation error:", err),
-    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
-  );
-}
-
-// ------------------------------------------------------------
-// Fetch all event spots from Firestore
+// Firestore helpers
 // ------------------------------------------------------------
 async function getEventSpots() {
   const snapshot = await getDocs(collection(db, "eventspots"));
   return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
 }
 
-// ------------------------------------------------------------
-// Fetch the most recent update for a given event spot
-// ------------------------------------------------------------
 async function getLatestUpdate(spotId) {
   const q = query(
     collection(db, "eventspots", spotId, "updates"),
@@ -187,10 +112,53 @@ async function getLatestUpdate(spotId) {
 }
 
 // ------------------------------------------------------------
-// Render event spot markers on the map
+// Popup HTML builder
 // ------------------------------------------------------------
-async function showEventSpots(map) {
-  let spots = [];
+function buildPopupHTML(spot, latest) {
+  const base = `<h3>${sanitize(spot.name)}</h3><p>${sanitize(spot.description)}</p>`;
+
+  if (!latest) {
+    return base + `<p>No posts yet.</p>`;
+  }
+
+  const imageHTML = latest.image
+    ? `<img src="${sanitize(latest.image)}" style="width:100%;border-radius:6px;margin-top:6px;">`
+    : "";
+
+  const time = latest.timestamp?.toDate().toLocaleString() ?? "";
+
+  return (
+    base +
+    `<p><strong>Status:</strong> ${sanitize(String(latest.status))} / 5</p>
+    <p><strong>${sanitize(latest.caption)}</strong></p>
+     <p>${sanitize(latest.details)}</p>
+     <p><em>${sanitize(time)}</em></p>
+     ${imageHTML}`
+  );
+}
+
+// ------------------------------------------------------------
+// Marker helper
+// ------------------------------------------------------------
+function createMarkerElement(colour) {
+  const el = document.createElement("div");
+  Object.assign(el.style, {
+    width: "20px",
+    height: "20px",
+    borderRadius: "50%",
+    backgroundColor: colour,
+    border: "2px solid white",
+    opacity: "0.85",
+    cursor: "pointer",
+  });
+  return el;
+}
+
+// ------------------------------------------------------------
+// Render event spots
+// ------------------------------------------------------------
+async function showEventSpots() {
+  let spots;
   try {
     spots = await getEventSpots();
   } catch (err) {
@@ -199,20 +167,8 @@ async function showEventSpots(map) {
   }
 
   spots.forEach((spot) => {
-    appState.spots.push(spot);
-
-    const colour = spot.latest_status
-      ? statusColours[spot.latest_status]
-      : "#9e9e9e";
-
-    const el = document.createElement("div");
-    el.style.width = "20px";
-    el.style.height = "20px";
-    el.style.borderRadius = "50%";
-    el.style.backgroundColor = colour;
-    el.style.border = "2px solid white";
-    el.style.opacity = "0.85";
-    el.style.cursor = "pointer";
+    const colour = STATUS_COLOURS[spot.latest_status] ?? "#9e9e9e";
+    const el = createMarkerElement(colour);
 
     const marker = new maplibregl.Marker({ element: el })
       .setLngLat([spot.location.lng, spot.location.lat])
@@ -222,86 +178,29 @@ async function showEventSpots(map) {
 
     el.addEventListener("click", async () => {
       const latest = await getLatestUpdate(spot.id);
-
-      const popupHTML = latest
-        ? `<h3>${spot.name}</h3>
-           <p>${spot.description}</p>
-           <p><strong>Status:</strong> ${latest.status} / 5</p>
-           <p>${latest.details}</p>
-           <p><em>${latest.timestamp?.toDate().toLocaleString() ?? ""}</em></p>
-           ${latest.image ? `<img src="${latest.image}" style="width:100%;border-radius:6px;margin-top:6px;">` : ""}`
-        : `<h3>${spot.name}</h3>
-           <p>${spot.description}</p>
-           <p>No reports yet.</p>`;
-
-      const reportForm = ``;
-
-      const popup = new maplibregl.Popup({ offset: 25 })
+      new maplibregl.Popup({ offset: 25 })
         .setLngLat([spot.location.lng, spot.location.lat])
-        .setHTML(popupHTML + reportForm)
+        .setHTML(buildPopupHTML(spot, latest))
         .addTo(map);
-
-      setTimeout(() => {
-        const btn = document.getElementById("report-submit");
-        btn?.addEventListener("click", async () => {
-          const status = parseInt(
-            document.getElementById("report-status").value,
-          );
-          const details = document.getElementById("report-details").value;
-
-          if (!status || status < 1 || status > 5) {
-            alert("Please enter a crowd level between 1 and 5.");
-            return;
-          }
-
-          await submitReport(spot.id, status, details);
-          popup.remove();
-        });
-      }, 100);
     });
   });
 }
 
 // ------------------------------------------------------------
-// Seed Firestore with initial event spots (See spotsImporter.js file to see the parser in action)
+// Live Firestore listener
 // ------------------------------------------------------------
-import { seedEventSpotsFromCSV } from "./spotsImporter.js";
-
-seedEventSpotsFromCSV();
-
-// ------------------------------------------------------------
-// Submit a crowd report for a spot
-// ------------------------------------------------------------
-async function submitReport(spotId, status, details) {
-  console.log("submitReport called", spotId, status, details);
-  await addDoc(collection(db, "eventspots", spotId, "updates"), {
-    status,
-    details,
-    timestamp: serverTimestamp(),
-  });
-
-  await updateDoc(doc(db, "eventspots", spotId), {
-    latest_status: status,
-    last_updated: serverTimestamp(),
-  });
-}
-
-// ------------------------------------------------------------
-// Live listener — updates marker colours in real time
-// ------------------------------------------------------------
-function listenToEventSpots(map) {
+function listenToEventSpots() {
   onSnapshot(collection(db, "eventspots"), (snapshot) => {
     snapshot.docChanges().forEach((change) => {
+      if (change.type !== "modified") return;
+
       const spot = { id: change.doc.id, ...change.doc.data() };
-      if (change.type === "modified") {
-        const marker = markerMap[spot.id];
-        if (!marker) return;
-        marker.getElement().style.backgroundColor = spot.latest_status
-          ? statusColours[spot.latest_status]
-          : "#9e9e9e";
-        //called pulsemarker from below:
-        pulseMarker(spot.id, spot.latest_status);
-      }
+      const marker = markerMap[spot.id];
+      if (!marker) return;
+
+      const colour = STATUS_COLOURS[spot.latest_status] ?? "#9e9e9e";
+      marker.getElement().style.backgroundColor = colour;
+      pulseMarker(spot.id, spot.latest_status);
     });
   });
 }
@@ -309,38 +208,37 @@ function listenToEventSpots(map) {
 // ------------------------------------------------------------
 // Busyness legend
 // ------------------------------------------------------------
-const existingLegend = document.getElementById("map-legend");
-if (existingLegend) existingLegend.remove();
+function renderLegend() {
+  document.getElementById("map-legend")?.remove();
 
-const legend = document.createElement("div");
-legend.id = "map-legend";
-legend.style.cssText = `
-  position: absolute;
-  bottom: 40px;
-  right: 10px;
-  background: white;
-  padding: 10px 14px;
-  border-radius: 6px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.35);
-  font-family: sans-serif;
-  font-size: 12px;
-  z-index: 9999;
-`;
-
-legend.innerHTML = `
-  <div style="font-weight:bold;margin-bottom:6px;">Busyness</div>
-  <div style="
-    width: 150px; height: 16px;
-    border-radius: 4px;
-    background: linear-gradient(to right, #00c853, #aeea00, #ffd600, #ff6d00, #d50000);
-  "></div>
-  <div style="display:flex;justify-content:space-between;margin-top:4px;">
-    <span>Not busy</span>
-    <span>Very busy</span>
-  </div>
-`;
-
-document.getElementById("map").appendChild(legend);
+  const legend = document.createElement("div");
+  legend.id = "map-legend";
+  legend.style.cssText = `
+    position: absolute;
+    bottom: 40px;
+    right: 10px;
+    background: white;
+    padding: 10px 14px;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+    font-family: sans-serif;
+    font-size: 12px;
+    z-index: 9999;
+  `;
+  legend.innerHTML = `
+    <div style="font-weight:bold;margin-bottom:6px;">Busyness</div>
+    <div style="
+      width: 150px; height: 16px;
+      border-radius: 4px;
+      background: linear-gradient(to right, #00c853, #aeea00, #ffd600, #ff6d00, #d50000);
+    "></div>
+    <div style="display:flex;justify-content:space-between;margin-top:4px;">
+      <span>Not busy</span>
+      <span>Very busy</span>
+    </div>
+  `;
+  document.getElementById("map").appendChild(legend);
+}
 
 // ------------------------------------------------------------
 // Pulse animation on marker update
@@ -349,27 +247,23 @@ function pulseMarker(spotId, status) {
   const marker = markerMap[spotId];
   if (!marker) return;
 
-  const lngLat = marker.getLngLat();
+  const { lng, lat } = marker.getLngLat();
   const sourceId = `pulse-${spotId}`;
   const layerId = `pulse-layer-${spotId}`;
+  const colour = STATUS_COLOURS[status] ?? "#9e9e9e";
 
   const geojson = {
     type: "Feature",
-    geometry: { type: "Point", coordinates: [lngLat.lng, lngLat.lat] },
+    geometry: { type: "Point", coordinates: [lng, lat] },
   };
 
-  // --- SOURCE ---
   const existingSource = map.getSource(sourceId);
   if (existingSource) {
     existingSource.setData(geojson);
   } else {
-    map.addSource(sourceId, {
-      type: "geojson",
-      data: geojson,
-    });
+    map.addSource(sourceId, { type: "geojson", data: geojson });
   }
 
-  // --- LAYER ---
   if (!map.getLayer(layerId)) {
     map.addLayer({
       id: layerId,
@@ -377,14 +271,13 @@ function pulseMarker(spotId, status) {
       source: sourceId,
       paint: {
         "circle-radius": 0,
-        "circle-color": statusColours[status] ?? "#9e9e9e",
+        "circle-color": colour,
         "circle-opacity": 0.4,
         "circle-blur": 0.5,
       },
     });
   }
 
-  // --- ANIMATION ---
   let radius = 0;
   let opacity = 0.4;
 
