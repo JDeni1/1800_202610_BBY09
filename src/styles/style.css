@@ -1,7 +1,7 @@
 body {
   margin-left: 60px; /* matches collapsed sidebar width */
   transition: margin-left 0.25s ease;
-  background-color: rgb(192, 192, 192);
+  background-color: rgb(200, 240, 255);
 }
 
 #filterWrapper {
