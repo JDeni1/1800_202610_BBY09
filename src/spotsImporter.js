@@ -1,3 +1,18 @@
+/*
+ * spotsImporter.js
+ *
+ * Imports eventspot data (usually from a CSV or JSON file)
+ * and creates MP### documents in Firestore.
+ *
+ * For each row:
+ *  - Creates the MP### eventspot doc if missing
+ *  - Sets name, description, and location fields
+ *  - Optionally seeds initial update-history entries
+ *
+ * Used for bulk creation of monitor points.
+ */
+
+
 import { collection, doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "./firebaseConfig.js";
 import Papa from "papaparse";
@@ -35,7 +50,7 @@ export async function seedEventSpotsFromCSV() {
       { merge: true },
     );
 
-    console.log("Seeded:", row.monitor_point);
+    //console.log("Seeded:", row.monitor_point); //Uncomment if you want to see the console log the seeded spots!
   }
 
   console.log("Done seeding CSV spots!");

@@ -61,8 +61,10 @@ function initMap(center) {
 
   map.once("load", async () => {
     await showEventSpots();
+    await refreshAllMarkerColours();
     listenToEventSpots();
     initSearchBar(map);
+    pulseRecentUpdates();
     renderLegend();
     document.getElementById("map-loading").style.display = "none";
   });
@@ -166,8 +168,12 @@ async function showEventSpots() {
     return;
   }
 
-  spots.forEach((spot) => {
-    const colour = STATUS_COLOURS[spot.latest_status] ?? "#9e9e9e";
+  spots.forEach(async (spot) => {
+    // Always fetch the true latest update
+    const latest = await getLatestUpdate(spot.id);
+
+    const colour = latest ? STATUS_COLOURS[latest.status] : "#9e9e9e";
+
     const el = createMarkerElement(colour);
 
     const marker = new maplibregl.Marker({ element: el })
@@ -177,10 +183,10 @@ async function showEventSpots() {
     markerMap[spot.id] = marker;
 
     el.addEventListener("click", async () => {
-      const latest = await getLatestUpdate(spot.id);
+      const latestUpdate = await getLatestUpdate(spot.id);
       new maplibregl.Popup({ offset: 25 })
         .setLngLat([spot.location.lng, spot.location.lat])
-        .setHTML(buildPopupHTML(spot, latest))
+        .setHTML(buildPopupHTML(spot, latestUpdate))
         .addTo(map);
     });
   });
@@ -272,25 +278,26 @@ function pulseMarker(spotId, status) {
       paint: {
         "circle-radius": 0,
         "circle-color": colour,
-        "circle-opacity": 0.4,
-        "circle-blur": 0.5,
+        "circle-opacity": 0.5,
+        "circle-blur": 0.6,
       },
     });
   }
 
   let radius = 0;
-  let opacity = 0.4;
+  let opacity = 0.5;
 
   function animate() {
-    radius += 0.8;
-    opacity -= 0.4 / 50;
+    radius += 0.25; // slower expansion
+    opacity -= 0.5 / 180; // fade over ~3 seconds
 
     if (map.getLayer(layerId)) {
       map.setPaintProperty(layerId, "circle-radius", radius);
       map.setPaintProperty(layerId, "circle-opacity", Math.max(opacity, 0));
     }
 
-    if (radius < 40) {
+    if (radius < 80) {
+      // bigger ring, longer duration
       requestAnimationFrame(animate);
     } else {
       if (map.getLayer(layerId)) map.removeLayer(layerId);
@@ -299,4 +306,41 @@ function pulseMarker(spotId, status) {
   }
 
   requestAnimationFrame(animate);
+}
+
+//This will make the heat bubbles visible when you return to the heatmap:
+async function pulseRecentUpdates() {
+  const snapshot = await getDocs(collection(db, "eventspots"));
+  const now = Date.now();
+
+  snapshot.forEach((doc) => {
+    const data = doc.data();
+    const updated = data.last_updated?.toMillis?.();
+
+    if (!updated) return;
+
+    // Only pulse if the update happened AFTER your last visit
+    if (updated > lastVisit) {
+      pulseMarker(doc.id, data.latest_status);
+    }
+  });
+
+  // Update lastVisit AFTER checking
+  lastVisit = now;
+}
+
+async function refreshAllMarkerColours() {
+  const snapshot = await getDocs(collection(db, "eventspots"));
+
+  snapshot.forEach((doc) => {
+    const data = doc.data();
+    const marker = markerMap[doc.id];
+    if (!marker) return;
+
+    const colour = data.latest_status
+      ? STATUS_COLOURS[data.latest_status]
+      : "#9e9e9e";
+
+    marker.getElement().style.backgroundColor = colour;
+  });
 }
