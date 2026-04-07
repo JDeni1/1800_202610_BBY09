@@ -48,7 +48,7 @@ function initMap(center) {
     center,
     zoom: 13,
   });
-
+//This is where the zoom in/out buttons are on the map.
   map.addControl(new maplibregl.NavigationControl(), "top-right");
   map.addControl(
     new maplibregl.GeolocateControl({
