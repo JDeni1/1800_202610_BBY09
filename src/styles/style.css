@@ -1,7 +1,7 @@
 body {
   margin-left: 60px; /* matches collapsed sidebar width */
   transition: margin-left 0.25s ease;
-  background-color: rgb(200, 240, 255);
+  background-color: rgb(71, 148, 176);
 }
 
 #filterWrapper {
@@ -46,10 +46,6 @@ body {
   flex-direction: row; /* ← back to row when expanded */
 }
 
-#filterWrapper {
-  background-color: azure;
-}
-
 /*-------------------NAV BAR-------------------------------*/
 .sidebar {
   position: fixed;
@@ -57,7 +53,7 @@ body {
   left: 0;
   height: 100vh;
   width: 60px;
-  background: #ffffffe8;
+  background: #f5a615;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -74,7 +70,7 @@ body {
 .sidebar-toggle {
   background: none;
   border: none;
-  color: black;
+  color: rgb(255, 255, 255);
   font-size: 22px;
   cursor: pointer;
   margin-bottom: 24px;
@@ -83,7 +79,7 @@ body {
 }
 .nav-brand {
   display: none;
-  color: black;
+  color: rgb(255, 255, 255);
   font-weight: bold;
   font-size: 16px;
   margin-bottom: 20px;
@@ -104,7 +100,7 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
-  color: black;
+  color: rgb(255, 255, 255);
   text-decoration: none;
   padding: 10px 8px;
   border-radius: 6px;
@@ -138,12 +134,12 @@ body {
   white-space: nowrap;
 }
 .btn-outline-black {
-  color: black;
-  border: 2px solid black;
+  color: rgb(255, 255, 255);
+  border: 2px solid rgb(255, 255, 255);
   background-color: transparent;
 }
 
 .btn-outline-black:hover {
-  background-color: black;
+  background-color: rgb(255, 255, 255);
   color: white;
 }

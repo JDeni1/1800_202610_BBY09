@@ -13,9 +13,9 @@ export async function loginUser(email, password) {
   return signInWithEmailAndPassword(auth, email, password);
 }
 
-/* Creates a Firebase Auth user and a matching Firestore document*/
+/* Creates a Firebase Auth user and a matching Firestore document. */
 export async function signupUser(name, email, password) {
-  /* creates userCredential object which puushes a user object to firebase.*/
+  /* creates userCredential object which pushes a user object to firebase.*/
   const userCredential = await createUserWithEmailAndPassword(
     auth,
     email,

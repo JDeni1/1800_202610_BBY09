@@ -2,7 +2,7 @@
 
 ## Overview
 
-Crowd Control, a visual demonstration of crowds around the 5 most congested areas within the FIFA Area area in Vancouver.
+Crowd Control,
 
 Developed for the COMP 1800 course, this project applies User-Centred Design practices and agile project management, and demonstrates integration with Firebase backend services for storing user favorites.
 
@@ -18,7 +18,7 @@ Developed for the COMP 1800 course, this project applies User-Centred Design pra
 
 ## Technologies Used
 
-- **Frontend**: HTML, CSS, JavaScript
+- **Frontend**: HTML, CSS, JavaScript, bootstrap
 - **Build Tool**: [Vite](https://vitejs.dev/)
 - **Backend**: Firebase for hosting
 - **Database**: Firestore
@@ -45,16 +45,23 @@ Once the application is running:
 ## Project Structure
 
 ```
-elmo-hikes/
-├── src/
-│   ├── main.js
-├── styles/
-│   └── style.css
+1800_202610_BBY09/
+├── data/
+├── node_modules/
 ├── public/
-├── images/
+│   ├── bootstrap/
+│   │   ├── css/
+│   │   └── js/
+│   ├── images/
+│   ├── login.html
+│   ├── newPost.html
+│   ├── profile.html
+│   └── socialfeed.html
+├── src/
 ├── index.html
+├── package-lock.json
 ├── package.json
-├── README.md
+└── README.md
 ```
 
 ---
@@ -62,8 +69,8 @@ elmo-hikes/
 ## Contributors
 
 - **Ozgur** - BCIT CST Student learning Git collaboration.
-- **Jill** - BCIT CST Student, who appricate walks.
-- **Darwin** - BCIT CST Student, a radio expert.!
+- **Jill** - BCIT CST Student, who dreams of living in the countryside.
+- **Darwin** - BCIT CST Student, a radio expert.
 
 ---
 
@@ -73,7 +80,11 @@ elmo-hikes/
 - Code snippets were adapted from resources such as [Stack Overflow](https://stackoverflow.com/) and [MDN Web Docs](https://developer.mozilla.org/).
 - Icons sourced from [FontAwesome](https://fontawesome.com/) and images from [Unsplash](https://unsplash.com/).
 
----
+## Refrances
+
+- MapLibre GL JS, "MapLibre GL JS Documentation," MapLibre, 2024. [Online]. Available: https://maplibre.org/maplibre-gl-js/docs/
+- MapTiler, "MapTiler Cloud API Documentation," MapTiler, 2024. [Online]. Available: https://docs.maptiler.com/cloud/api/
+- Freepik Company, "Flaticon — Free Vector Icons," Flaticon, 2024. [Online]. Available: https://www.flaticon.com/
 
 ## Limitations and Future Work
 

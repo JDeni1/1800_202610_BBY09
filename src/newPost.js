@@ -57,7 +57,6 @@ async function populateSpotDropdown() {
   }
 
   const select = document.getElementById("spotSelect");
-  //
   snapshot.docs.forEach((d) => {
     const option = document.createElement("option");
     option.value = d.id;
@@ -66,7 +65,7 @@ async function populateSpotDropdown() {
   });
 
   if ("geolocation" in navigator) {
-    /* Calculates the nearest location based on user position  */
+    /* Calculates the nearest event spot based on user position.   */
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const { latitude: userLat, longitude: userLng } = pos.coords;
@@ -118,7 +117,7 @@ function updateRatingUI(rating) {
   });
 }
 
-/* A Guard Function. */
+/* A Guard Function for all the potential bugs and errors a user may face when filling the form. */
 async function handleSubmit() {
   hideFeedback();
 
