@@ -40,7 +40,7 @@ main {
   align-items: center;
   background: white;
   border-radius: 24px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
   padding: 0 16px;
   width: 260px;
   height: 44px;
@@ -60,7 +60,6 @@ main {
   flex: 1;
   min-width: 0;
   font-size: 16px;
-
 }
 
 /* Search suggestions dropdown */
@@ -71,7 +70,7 @@ main {
   width: 100%;
   background: white;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   list-style: none;
   margin: 0;
   padding: 4px 0;
@@ -92,7 +91,7 @@ main {
 
 /* This makes the buttons bigger: */
 .maplibregl-ctrl-group {
-  transform: scale(4.0);
+  transform: scale(4);
   transform-origin: top right;
 }
 
@@ -119,3 +118,4 @@ main {
   z-index: 999;
   display: none;
 }
+/*-----------*/

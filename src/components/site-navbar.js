@@ -22,7 +22,7 @@ class SiteNavbar extends HTMLElement {
 
         <ul>
           <li>
-            <span><a href="map.html"><span class="icon">
+            <span><a href="index.html"><span class="icon">
             <img src="/images/maps.png" height="28">
             </span>
             <span class="nav-mini-label">Map</span>
@@ -86,13 +86,13 @@ class SiteNavbar extends HTMLElement {
       this.updateProfileIcon(user);
 
       if (user) {
-        authControls.innerHTML = `<button class="btn btn-outline-dark w-100" id="signOutBtn" type="button"><img src = "/images/log-out.png" height = "28">
+        authControls.innerHTML = `<button class="btn btn-outline-light w-100" id="signOutBtn" type="button"><img src = "/images/log-out.png" height = "28">
          <span class="nav-label">Log out</span></button>`;
         authControls
           .querySelector("#signOutBtn")
           .addEventListener("click", logoutUser);
       } else {
-        authControls.innerHTML = `<a class="btn btn-outline-dark w-100" href="/login.html">
+        authControls.innerHTML = `<a class="btn btn-outline-light w-100" href="/login.html">
         LOGIN<span class="nav-label"></span></a>`;
       }
     });

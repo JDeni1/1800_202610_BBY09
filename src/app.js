@@ -22,7 +22,7 @@ function showName() {
   });
 }
 
-/* Function that fetches post from firestore database and builds HTML cards based on the data. */
+/* Function that fetches post from firestore database and builds HTML cards based on the data.*/
 async function displayCardsDynamically() {
   // Grabs the template and container ID to fill.
   const cardTemplate = document.getElementById("postCardTemplate");
@@ -31,7 +31,7 @@ async function displayCardsDynamically() {
   if (!cardTemplate || !cardContainer) return;
 
   try {
-    // Points to the location (collection of data.)
+    // Points to the location (collection  - post(Within the firebase database))
     const querySnapshot = await getDocs(collection(db, "posts"));
 
     querySnapshot.forEach((doc) => {
