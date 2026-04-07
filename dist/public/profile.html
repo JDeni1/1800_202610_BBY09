@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>CrowdControl - Profile</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script type="module" crossorigin src="/assets/profile-GWv1ioSV.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/style-C8lpMh0T.js">
+    <link rel="stylesheet" crossorigin href="/assets/style-PR4gWVAG.css">
+  </head>
+
+  <body>
+    <!--NAV BAR-->
+    <site-navbar></site-navbar>
+
+    <main class="profile-page">
+      <section class="profile-header">
+        <div class="profile-top">
+          <img
+            id="profileImage"
+            class="profile-avatar"
+            src="/images/default-profile.png"
+            alt="Profile Picture"
+          />
+
+          <div>
+            <h1 id="profileName" class="profile-title">Profile</h1>
+            <p id="profileSubtitle" class="profile-subtitle">0 posts</p>
+          </div>
+        </div>
+
+        <div class="upload-box">
+          <label for="inputImage" class="form-label fw-semibold">
+            Update profile picture
+          </label>
+          <input
+            class="form-control"
+            type="file"
+            id="inputImage"
+            accept="image/*"
+          />
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section-title">My Posts</h2>
+
+        <div id="emptyPostsMessage" class="empty-posts">No posts yet.</div>
+
+        <div id="postsContainer" class="row g-4"></div>
+      </section>
+    </main>
+
+    <template id="postCardTemplate">
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card post-card">
+          <img class="card-img-top card-image" src="" alt="post image" />
+          <div class="card-body">
+            <h5 class="card-title"></h5>
+            <p class="card-text"></p>
+            <p class="mb-3">
+              <strong>Location:</strong>
+              <span class="card-location"></span>
+            </p>
+            <a class="btn btn-primary read-more" href="#">Read More</a>
+          </div>
+        </div>
+      </div>
+    </template>
+  </body>
+</html>

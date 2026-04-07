@@ -37,13 +37,15 @@ function initAuthUI() {
     clearTimeout(errorTimeout);
   }
 
-  /* Prevents double sumbitions : if the form is null, it won't crash. */
+  /* Prevents double sumbitions : if the form is null, it won't crash.
+    That way when users press submit with an empty form, the button will be disabled. */
   function setSubmitDisabled(form, disabled) {
     const submitBtn = form?.querySelector('[type="submit"]');
     if (submitBtn) submitBtn.disabled = disabled;
   }
 
-  /*Call back functions where when clicked determins if the (login/sign up) view is visible. */
+  /*Call back functions where when clicked determins if the (login/sign up) view is visible. 
+    This will display the log in form when the user clicks the log in button.*/
   toSignupBtn?.addEventListener("click", (e) => {
     e.preventDefault();
     hideError();

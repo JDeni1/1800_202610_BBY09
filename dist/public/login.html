@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Crowd Control</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script type="module" crossorigin src="/assets/login-BwYq0VzH.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/style-C8lpMh0T.js">
+    <link rel="modulepreload" crossorigin href="/assets/app-b2uk4N-a.js">
+    <link rel="stylesheet" crossorigin href="/assets/style-PR4gWVAG.css">
+  </head>
+
+  <body>
+    <!-- NAV BAR -->
+    <site-navbar></site-navbar>
+
+    <!-- GUEST OPTION-->
+    <div class="container py-5" style="max-width: 420px">
+      <div id="authAlert" class="alert alert-danger d-none" role="alert"></div>
+      <div class="text-center mt-3">
+        <a href="map.html" class="btn btn-outline-secondary w-100"
+          >Continue as Guest</a
+        >
+      </div>
+
+      <!-- Log In view  -->
+      <div id="loginView">
+        <h3 class="mb-3 text-center">Login</h3>
+        <form id="loginForm" novalidate>
+          <div class="mb-3">
+            <input
+              type="email"
+              id="loginEmail"
+              class="form-control"
+              placeholder="Email"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <input
+              type="password"
+              id="loginPassword"
+              class="form-control"
+              placeholder="Password"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Login</button>
+        </form>
+        <small class="d-block mt-3 text-center">
+          Don’t have an account?
+          <a href="#" id="toSignup">Sign up</a>
+        </small>
+      </div>
+
+      <!-- Sign-up FORM-->
+      <div id="signupView" class="d-none">
+        <h3 class="mb-3 text-center">Sign Up</h3>
+        <form id="signupForm" novalidate>
+          <div class="mb-3">
+            <input
+              type="text"
+              id="signupName"
+              class="form-control"
+              placeholder="First and Last Name"
+              aria-label="Full name"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <input
+              type="email"
+              id="signupEmail"
+              class="form-control"
+              placeholder="Email"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <input
+              type="password"
+              id="signupPassword"
+              class="form-control"
+              placeholder="Password"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-success w-100">
+            Create Account
+          </button>
+        </form>
+        <small class="d-block mt-3 text-center">
+          Already have an account?
+          <a href="#" id="toLogin">Login</a>
+        </small>
+      </div>
+    </div>
+  </body>
+</html>
