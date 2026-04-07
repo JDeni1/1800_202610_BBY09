@@ -329,6 +329,7 @@ async function pulseRecentUpdates() {
   lastVisit = now;
 }
 
+//
 async function refreshAllMarkerColours() {
   const snapshot = await getDocs(collection(db, "eventspots"));
 

@@ -3,7 +3,7 @@ import "bootstrap";
 import "./styles/style.css";
 import { loginUser, signupUser, authErrorMessage } from "./authentication.js";
 
-/* The entry pointn to reading the page.*/
+/* The entry point to reading the page.*/
 function initAuthUI() {
   const alertEl = document.getElementById("authAlert");
   const loginView = document.getElementById("loginView");

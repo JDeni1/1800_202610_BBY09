@@ -9,6 +9,7 @@ export function initSearchBar(map) {
   const searchInput = document.getElementById("search-input");
   if (!searchInput) return;
 
+  //Create suggestion box:
   const suggestionBox = document.createElement("ul");
   suggestionBox.id = "search-suggestions";
   document.getElementById("search-bar").appendChild(suggestionBox);
@@ -18,19 +19,21 @@ export function initSearchBar(map) {
     const query = searchInput.value.trim();
     suggestionBox.innerHTML = "";
 
+    //require muminium amount of characters:
     if (query.length < 2) {
       suggestionBox.classList.remove("visible");
       return;
     }
 
-    // Improved geocoding request where you can search up Landmarks and Locations now:
+    // Improved geocoding request where you can search up Landmarks and Locations now (POI's and addressses):
     const url = `https://api.maptiler.com/geocoding/${encodeURIComponent(
       query
     )}.json?key=${import.meta.env.VITE_MAPTILER_KEY}&limit=8&autocomplete=true&types=poi,address`;
 
     const res = await fetch(url);
     const data = await res.json();
-
+    
+    //If there aren't any results displayed then hide the search bar:
     if (!data.features || data.features.length === 0) {
       suggestionBox.classList.remove("visible");
       return;
