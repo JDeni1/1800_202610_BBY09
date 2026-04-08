@@ -22,7 +22,7 @@ function initAuthUI() {
 
   let errorTimeout;
 
-  /* Puts error messages as alerts and makes it visable for a certain number of times  */
+  /* Puts error messages as alerts and makes it visible for a certain number of times  */
   function showError(msg) {
     alertEl.textContent = msg || "";
     alertEl.classList.remove("d-none");
@@ -37,14 +37,14 @@ function initAuthUI() {
     clearTimeout(errorTimeout);
   }
 
-  /* Prevents double sumbitions : if the form is null, it won't crash.
+  /* Prevents double submissions : if the form is null, it won't crash.
     That way when users press submit with an empty form, the button will be disabled. */
   function setSubmitDisabled(form, disabled) {
     const submitBtn = form?.querySelector('[type="submit"]');
     if (submitBtn) submitBtn.disabled = disabled;
   }
 
-  /*Call back functions where when clicked determins if the (login/sign up) view is visible. 
+  /*Call back functions where when clicked determines if the (login/sign up) view is visible. 
     This will display the log in form when the user clicks the log in button.*/
   toSignupBtn?.addEventListener("click", (e) => {
     e.preventDefault();

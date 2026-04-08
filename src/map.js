@@ -308,7 +308,10 @@ function pulseMarker(spotId, status) {
   requestAnimationFrame(animate);
 }
 
-//This will make the heat bubbles visible when you return to the heatmap:
+//-----------------------------------------------------------------------
+//function pulseRecentUpdates
+//This will make the heat bubbles visible when you return to the heatmap.
+//-----------------------------------------------------------------------
 async function pulseRecentUpdates() {
   const snapshot = await getDocs(collection(db, "eventspots"));
   const now = Date.now();
@@ -325,11 +328,14 @@ async function pulseRecentUpdates() {
     }
   });
 
-  // Update lastVisit AFTER checking
+  // Update lastVisit AFTER checking:
   lastVisit = now;
 }
 
-//
+//---------------------------------------------------
+//A refresh function called after an update to keep visible map markers
+//visibly in sync with their latest status in the database.
+//---------------------------------------------------
 async function refreshAllMarkerColours() {
   const snapshot = await getDocs(collection(db, "eventspots"));
 
