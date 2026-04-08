@@ -36,9 +36,9 @@ To run the application locally:
 
 Once the application is running:
 
-1.  Browse the list of hiking trails displayed on the main page.
-2.  Click the heart icon (or similar) to mark a trail as a favorite.
-3.  View your favorite hikes in the favorites section.
+1.  Browse the map of hostpots displayed on the main page.
+2.  Click the dot (or similar) to mark a spot as being busy or not.
+3.  View your posts in the social section.
 
 ---
 
