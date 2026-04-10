@@ -29,16 +29,16 @@ class SiteNavbar extends HTMLElement {
             <span class="nav-label">Heatmap</span></a>
           </li>
           <li>
-            <a href="newPost.html"><span class="icon">
+            <a href="/public/newPost.html"><span class="icon">
             <img src="/images/post.png" height="28"></span>
             <span class="nav-mini-label">Post</span><span class="nav-label">New Post</span></a></li>
           <li>
-            <span><a href="socialfeed.html">
+            <span><a href="/public/socialfeed.html">
             <span class="icon"><img src="/images/people.png" height="28"></span>
             <span class="nav-mini-label">Social</span><span class="nav-label">Social</span></a>
          </li>
           <li>
-            <span><a href="profile.html">
+            <span><a href="/public/profile.html">
             <span class="icon"><img src="/images/user.png" height="28"></span>
             <span class="nav-mini-label">Profile</span><span class="nav-label">Profile</span></a>
           </li>
