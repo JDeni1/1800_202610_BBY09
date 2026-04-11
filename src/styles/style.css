@@ -40,10 +40,10 @@ body {
   white-space: nowrap;
   transition: background 0.15s;
   justify-content: center;
-  flex-direction: column; /* ← add this */
+  flex-direction: column;
 }
 .sidebar.open ul li a {
-  flex-direction: row; /* ← back to row when expanded */
+  flex-direction: row;
 }
 
 /*-------------------NAV BAR-------------------------------*/
@@ -142,4 +142,191 @@ body {
 .btn-outline-black:hover {
   background-color: rgb(255, 255, 255);
   color: white;
+}
+
+/* ---------------- PROFILE PAGE ---------------- */
+
+.profile-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px 28px 32px;
+}
+
+.profile-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px 28px 32px;
+}
+
+.profile-header {
+  margin-bottom: 20px;
+}
+
+.profile-top,
+.profile-info-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+#profileImage {
+  width: 120px;
+  height: 120px;
+  min-width: 120px;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+  border: 3px solid white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+  background: white;
+}
+
+.profile-info {
+  flex: 1;
+  min-width: 220px;
+}
+
+#profileName,
+.profile-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+  color: #1c1c1c;
+}
+
+#profileSubtitle,
+.profile-subtitle {
+  font-size: 0.95rem;
+  margin: 0 0 10px 0;
+  color: #1c1c1c;
+  opacity: 0.8;
+}
+
+.profile-actions {
+  margin: 8px 0 12px;
+}
+
+.profile-upload,
+.upload-box {
+  max-width: 360px;
+}
+
+.user-info-section {
+  margin: 18px 0 26px;
+}
+
+.user-info-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 18px;
+  padding: 18px 22px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  max-width: 420px;
+}
+
+.user-info-card p {
+  margin: 0 0 10px 0;
+  color: #1c1c1c;
+  font-size: 1rem;
+}
+
+.user-info-card p:last-child {
+  margin-bottom: 0;
+}
+
+.posts-section {
+  margin-top: 16px;
+}
+
+.section-title,
+.posts-section h2 {
+  font-size: 1.6rem;
+  margin-bottom: 14px;
+  color: #1c1c1c;
+}
+
+.empty-posts {
+  background: rgba(255, 255, 255, 0.9);
+  color: #1c1c1c;
+  display: inline-block;
+  padding: 10px 14px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+/* POSTS */
+
+#postsContainer,
+.posts-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.post-item {
+  width: 250px;
+}
+
+#postsContainer .card,
+.posts-grid .card,
+.post-card {
+  width: 250px;
+  border: none;
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.14);
+  transition: transform 0.2s ease;
+}
+
+#postsContainer .card:hover,
+.posts-grid .card:hover,
+.post-card:hover {
+  transform: translateY(-3px);
+}
+
+#postsContainer .card img,
+.posts-grid .card img,
+.post-card img,
+.card-image {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+}
+
+#postsContainer .card-body,
+.posts-grid .card-body,
+.post-card .card-body {
+  padding: 14px;
+}
+
+#postsContainer .card-title,
+.posts-grid .card-title,
+.post-card .card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+#postsContainer .btn,
+.posts-grid .btn,
+.post-card .btn {
+  border-radius: 8px;
+}
+
+@media (max-width: 768px) {
+  .profile-top,
+  .profile-info-wrapper {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  #postsContainer,
+  .posts-grid {
+    justify-content: center;
+  }
+
+  .user-info-card {
+    max-width: 100%;
+  }
 }
