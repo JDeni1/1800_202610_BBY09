@@ -91,7 +91,7 @@ main {
 
 /* This makes the buttons bigger: */
 .maplibregl-ctrl-group {
-  transform: scale(4);
+  transform: scale(1);
   transform-origin: top right;
 }
 
