@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>CrowdControl - Profile</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script type="module" crossorigin src="/assets/profile-D4EaGeuv.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/style-BFfoeqTT.js">
+    <link rel="stylesheet" crossorigin href="/assets/style.css">
+  </head>
+
+  <body>
+    <site-navbar></site-navbar>
+
+    <main class="profile-page profile-container">
+      <section class="profile-header">
+        <div class="profile-top profile-info-wrapper">
+          <img
+            id="profileImage"
+            class="profile-avatar"
+            src="/images/default-profile.png"
+            alt="Profile Picture"
+          />
+
+          <div class="profile-info">
+            <h1 id="profileName" class="profile-title">Profile</h1>
+            <p id="profileSubtitle" class="profile-subtitle">0 posts</p>
+
+            <div class="profile-actions">
+              <button class="btn btn-dark" id="editProfileBtn" type="button">
+                Edit Profile
+              </button>
+            </div>
+
+            <div class="upload-box profile-upload">
+              <label for="inputImage" class="form-label fw-semibold">
+                Update profile picture
+              </label>
+              <input
+                class="form-control"
+                type="file"
+                id="inputImage"
+                accept="image/*"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="user-info-section">
+        <h2 class="section-title">User Information</h2>
+
+        <div class="user-info-card">
+          <p><strong>Name:</strong> <span id="userInfoName">Not available</span></p>
+          <p><strong>Email:</strong> <span id="userInfoEmail">Not available</span></p>
+        </div>
+      </section>
+
+      <section class="posts-section">
+        <h2 class="section-title">My Posts</h2>
+
+        <div id="emptyPostsMessage" class="empty-posts">No posts yet.</div>
+
+        <div id="postsContainer" class="posts-grid"></div>
+      </section>
+    </main>
+
+    <template id="postCardTemplate">
+      <div class="post-item">
+        <div class="card post-card">
+          <img class="card-img-top card-image" src="" alt="post image" />
+          <div class="card-body">
+            <h5 class="card-title"></h5>
+            <p class="card-text"></p>
+            <p class="mb-3">
+              <strong>Location:</strong>
+              <span class="card-location"></span>
+            </p>
+            <a class="btn btn-primary read-more" href="#">Read More</a>
+          </div>
+        </div>
+      </div>
+    </template>
+  </body>
+</html>
