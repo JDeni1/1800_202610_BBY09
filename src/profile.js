@@ -12,6 +12,8 @@ import {
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 
+/* ---------------- PROFILE DISPLAY ---------------- */
+
 function displayProfileImage(imageDataUrl) {
   const imgElement = document.getElementById("profileImage");
   if (!imgElement || !imageDataUrl) return;
@@ -21,9 +23,60 @@ function displayProfileImage(imageDataUrl) {
 function displayProfileName(user) {
   const profileName = document.getElementById("profileName");
   if (!profileName) return;
-
   profileName.textContent = user.displayName || user.email || "Welcome back";
 }
+
+function displayUserInfo(user, userData = {}) {
+  const userInfoName = document.getElementById("userInfoName");
+  const userInfoEmail = document.getElementById("userInfoEmail");
+
+  const displayName = userData.name || user.displayName || "Not available";
+  const email = user.email || userData.email || "Not available";
+
+  if (userInfoName) userInfoName.textContent = displayName;
+  if (userInfoEmail) userInfoEmail.textContent = email;
+}
+
+/* ---------------- EDIT PROFILE ---------------- */
+
+function setupEditProfile(user, userData = {}) {
+  const editProfileBtn = document.getElementById("editProfileBtn");
+  if (!editProfileBtn) return;
+
+  editProfileBtn.addEventListener("click", async () => {
+    const currentName = userData.name || user.displayName || "";
+    const newName = prompt("Enter your name:", currentName);
+    if (newName === null) return;
+
+    try {
+      const userRef = doc(db, "users", user.uid);
+      await setDoc(
+        userRef,
+        {
+          name: newName.trim() || currentName || "Not available",
+          email: user.email || "Not available",
+        },
+        { merge: true }
+      );
+
+      const updatedUserData = {
+        ...userData,
+        name: newName.trim() || currentName || "Not available",
+        email: user.email || "Not available",
+      };
+
+      displayProfileName({
+        displayName: updatedUserData.name,
+        email: user.email,
+      });
+      displayUserInfo(user, updatedUserData);
+    } catch (error) {
+      console.error("Error updating profile info:", error);
+    }
+  });
+}
+
+/* ---------------- IMAGE ---------------- */
 
 async function saveProfileImage(userId, imageDataUrl) {
   try {
@@ -54,40 +107,66 @@ function uploadImage(userId) {
   });
 }
 
-async function populateUserInfo(userId) {
+/* ---------------- USER INFO ---------------- */
+
+async function populateUserInfo(user) {
   try {
-    const userRef = doc(db, "users", userId);
+    const userRef = doc(db, "users", user.uid);
     const userSnap = await getDoc(userRef);
 
-    if (!userSnap.exists()) return;
+    let userData = {};
 
-    const userData = userSnap.data();
-    const profileImage = userData.profileImage || "";
+    if (userSnap.exists()) {
+      userData = userSnap.data();
+      const profileImage = userData.profileImage || "";
 
-    if (profileImage) {
-      displayProfileImage(profileImage);
+      if (profileImage) {
+        displayProfileImage(profileImage);
+      }
     }
+
+    displayUserInfo(user, userData);
+    setupEditProfile(user, userData);
   } catch (error) {
     console.error("Error loading user profile:", error);
   }
 }
+
+/* ---------------- 🔥 FIRESTORE LOCATION FIX ---------------- */
+
+async function getSpotNameFromFirestore(spotId) {
+  try {
+    const spotRef = doc(db, "eventspots", spotId);
+    const spotSnap = await getDoc(spotRef);
+
+    if (spotSnap.exists()) {
+      return spotSnap.data().name;
+    }
+  } catch (e) {
+    console.error("Error:", e);
+  }
+
+  return "Event Spot";
+}
+
+/* ---------------- HELPERS ---------------- */
 
 function getSpotNameFromPath(path) {
   const parts = path.split("/");
   if (parts.length >= 2) {
     return parts[1];
   }
+  return "event-spot";
+}
+
+/* ❌ eski mapping artık kullanılmıyor */
+function getReadableLocation() {
   return "Event Spot";
 }
 
-function formatSpotName(spotName) {
-  return spotName
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-}
+/* ---------------- POSTS ---------------- */
 
-function createPostCard(post, docId, spotName) {
+async function createPostCard(post, docId, spotName) {
   const template = document.getElementById("postCardTemplate");
   const postCard = template.content.cloneNode(true);
 
@@ -100,7 +179,11 @@ function createPostCard(post, docId, spotName) {
   imageElement.src = post.image || "/images/default-profile.png";
   titleElement.textContent = post.caption || "Untitled Post";
   textElement.textContent = post.details || "No details available.";
-  locationElement.textContent = formatSpotName(spotName);
+
+  // 🔥 BURASI ASIL FIX
+  const realLocation = await getSpotNameFromFirestore(spotName);
+  locationElement.textContent = realLocation;
+
   readMoreLink.href = "#";
 
   return postCard;
@@ -124,25 +207,24 @@ async function loadUserPosts(user) {
     const postsRef = collectionGroup(db, "updates");
     const snapshot = await getDocs(postsRef);
 
-    snapshot.forEach((postDoc) => {
+    for (const postDoc of snapshot.docs) {
       const postData = postDoc.data();
 
       if (isUsersPost(postData, user)) {
         const spotName = getSpotNameFromPath(postDoc.ref.path);
-        const card = createPostCard(postData, postDoc.id, spotName);
+
+        // 🔥 await eklendi
+        const card = await createPostCard(postData, postDoc.id, spotName);
+
         postsContainer.appendChild(card);
         hasPosts = true;
         postCount++;
       }
-    });
+    }
 
     if (emptyPostsMessage) {
-      if (hasPosts) {
-        emptyPostsMessage.style.display = "none";
-      } else {
-        emptyPostsMessage.textContent = "No posts yet.";
-        emptyPostsMessage.style.display = "block";
-      }
+      emptyPostsMessage.style.display = hasPosts ? "none" : "block";
+      if (!hasPosts) emptyPostsMessage.textContent = "No posts yet.";
     }
 
     const profileSubtitle = document.getElementById("profileSubtitle");
@@ -159,6 +241,8 @@ async function loadUserPosts(user) {
   }
 }
 
+/* ---------------- INIT ---------------- */
+
 function initProfilePage() {
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
@@ -167,7 +251,7 @@ function initProfilePage() {
     }
 
     displayProfileName(user);
-    await populateUserInfo(user.uid);
+    await populateUserInfo(user);
     uploadImage(user.uid);
     await loadUserPosts(user);
   });
