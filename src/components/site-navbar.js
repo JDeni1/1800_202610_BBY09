@@ -22,7 +22,7 @@ class SiteNavbar extends HTMLElement {
 
         <ul>
           <li>
-            <a href="/index.html">
+            <a href="index.html">
               <span class="icon">
                 <img src="/images/maps.png" height="28" alt="Map icon">
               </span>
@@ -31,7 +31,7 @@ class SiteNavbar extends HTMLElement {
             </a>
           </li>
           <li>
-            <a href="/newPost.html">
+            <a href="newPost.html">
               <span class="icon">
                 <img src="/images/post.png" height="28" alt="Post icon">
               </span>
@@ -40,7 +40,7 @@ class SiteNavbar extends HTMLElement {
             </a>
           </li>
           <li>
-            <a href="/socialfeed.html">
+            <a href="socialfeed.html">
               <span class="icon">
                 <img src="/images/people.png" height="28" alt="Social icon">
               </span>
