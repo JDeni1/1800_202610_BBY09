@@ -132,7 +132,7 @@ async function populateUserInfo(user) {
   }
 }
 
-/* ---------------- 🔥 FIRESTORE LOCATION FIX ---------------- */
+/* ---------------- FIRESTORE LOCATION ---------------- */
 
 async function getSpotNameFromFirestore(spotId) {
   try {
@@ -159,7 +159,7 @@ function getSpotNameFromPath(path) {
   return "event-spot";
 }
 
-/* ❌ eski mapping artık kullanılmıyor */
+/* Fallback location */
 function getReadableLocation() {
   return "Event Spot";
 }
@@ -180,7 +180,6 @@ async function createPostCard(post, docId, spotName) {
   titleElement.textContent = post.caption || "Untitled Post";
   textElement.textContent = post.details || "No details available.";
 
-  // 🔥 BURASI ASIL FIX
   const realLocation = await getSpotNameFromFirestore(spotName);
   locationElement.textContent = realLocation;
 
@@ -212,8 +211,6 @@ async function loadUserPosts(user) {
 
       if (isUsersPost(postData, user)) {
         const spotName = getSpotNameFromPath(postDoc.ref.path);
-
-        // 🔥 await eklendi
         const card = await createPostCard(postData, postDoc.id, spotName);
 
         postsContainer.appendChild(card);
